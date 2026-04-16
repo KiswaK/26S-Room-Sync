@@ -12,7 +12,7 @@ CREATE TABLE Users (
    userEmail   VARCHAR(100) UNIQUE NOT NULL,
    userPhone   VARCHAR(20),
    userRole    VARCHAR(50)  NOT NULL,
-   userStatus  VARCHAR(50),
+   userStatus  VARCHAR(50)  NOT NULL DEFAULT 'active',
    PRIMARY KEY (userID)
 );
 
@@ -81,8 +81,8 @@ CREATE TABLE Landlord (
    lastName    VARCHAR(50)  NOT NULL,
    email       VARCHAR(100) NOT NULL,
    phone       VARCHAR(20),
-   isVerified  BOOLEAN,
-   joinedDate  VARCHAR(20),
+   isVerified  BOOLEAN      NOT NULL DEFAULT FALSE,
+   joinedDate  DATE         NOT NULL DEFAULT (CURRENT_DATE),
    FOREIGN KEY (userID) REFERENCES Users(userID)
        ON UPDATE CASCADE
        ON DELETE RESTRICT
@@ -138,8 +138,8 @@ CREATE TABLE Listing (
    landlordID      INT NOT NULL,
    brokerID        INT,
    renterID        INT,
-   availableDate   VARCHAR(20),
-   status          VARCHAR(50),
+   availableDate   DATE         NOT NULL,
+   status          VARCHAR(50)  NOT NULL DEFAULT 'available',
    cosignerName    VARCHAR(100),
    brokerFee       DECIMAL(10,2),
    FOREIGN KEY (apartmentID) REFERENCES Apartment(apartmentID)
@@ -159,7 +159,7 @@ CREATE TABLE Listing (
 
 CREATE TABLE ListingImage (
    listingImageID    INT AUTO_INCREMENT,
-   imageURL          VARCHAR(100) NOT NULL,
+   imageURL          VARCHAR(255) NOT NULL,
    listingID         INT NOT NULL,
    PRIMARY KEY (listingImageID),
    FOREIGN KEY (listingID) REFERENCES Listing(listingID)
@@ -173,9 +173,9 @@ CREATE TABLE Inquiry (
    listingID   INT NOT NULL,
    senderName  VARCHAR(100) NOT NULL,
    senderEmail VARCHAR(100) NOT NULL,
-   message     TEXT,
-   sentAt      VARCHAR(20),
-   isRead      BOOLEAN      DEFAULT FALSE,
+   message     TEXT         NOT NULL,
+   sentAt      DATE         NOT NULL DEFAULT (CURRENT_DATE),
+   isRead      BOOLEAN      NOT NULL DEFAULT FALSE,
    PRIMARY KEY(inquiryID),
    FOREIGN KEY (listingID) REFERENCES Listing(listingID)
        ON UPDATE CASCADE
@@ -187,10 +187,10 @@ CREATE TABLE PerformanceReport (
    reportID            INT AUTO_INCREMENT,
    apartmentID         INT NOT NULL,
    brokerID            INT NOT NULL,
-   applicationsCount   INT,
+   applicationsCount   INT          NOT NULL DEFAULT 0,
    occupancyRate       DECIMAL(5,2),
-   daysOnMarket        INT,
-   viewCount           INT,
+   daysOnMarket        INT          NOT NULL DEFAULT 0,
+   viewCount           INT          NOT NULL DEFAULT 0,
    PRIMARY KEY (reportID),
    FOREIGN KEY (apartmentID) REFERENCES Apartment(apartmentID)
        ON UPDATE CASCADE
@@ -198,8 +198,6 @@ CREATE TABLE PerformanceReport (
    FOREIGN KEY (brokerID)    REFERENCES Broker(brokerID)
        ON UPDATE CASCADE
        ON DELETE RESTRICT
-
-
 );
 
 
@@ -209,8 +207,8 @@ CREATE TABLE Reports (
    senderID              INT NOT NULL,
    listingID             INT,
    performanceReportID   INT,
-   reportType            VARCHAR(50),
-   reportReason          VARCHAR(255),
+   reportType            VARCHAR(50)  NOT NULL,
+   reportReason          VARCHAR(255) NOT NULL,
    reportedUserID        INT,
    PRIMARY KEY (reportID),
    FOREIGN KEY (adminID) REFERENCES Admin(adminID)
@@ -227,7 +225,7 @@ CREATE TABLE Reports (
        ON DELETE RESTRICT,
    FOREIGN KEY (reportedUserID) REFERENCES Users(userID)
        ON UPDATE CASCADE
-	 ON DELETE CASCADE
+       ON DELETE CASCADE
 );
 
 
@@ -237,9 +235,9 @@ CREATE TABLE ModerationAction (
    userID        INT NOT NULL,
    listingID     INT,
    reportID      INT,
-   actionType    VARCHAR(50),
-   actionStatus  VARCHAR(50),
-   actionDate    VARCHAR(25),
+   actionType    VARCHAR(50)  NOT NULL,
+   actionStatus  VARCHAR(50)  NOT NULL DEFAULT 'Pending',
+   actionDate    DATE         DEFAULT (CURRENT_DATE),
    actionReason  VARCHAR(255),
    PRIMARY KEY (actionID),
    FOREIGN KEY (adminID) REFERENCES Admin(adminID)
@@ -261,7 +259,11 @@ CREATE TABLE ApartmentAmenities (
    apartmentID  INT NOT NULL,
    featureID    INT NOT NULL,
    PRIMARY KEY (apartmentID, featureID),
-   FOREIGN KEY (apartmentID) REFERENCES Apartment(apartmentID),
+   FOREIGN KEY (apartmentID) REFERENCES Apartment(apartmentID)
+       ON UPDATE CASCADE
+       ON DELETE CASCADE,
    FOREIGN KEY (featureID)   REFERENCES ApartmentFeatures(featureID)
+       ON UPDATE CASCADE
+       ON DELETE CASCADE
 );
 -- END of Problem 1 Solution --
