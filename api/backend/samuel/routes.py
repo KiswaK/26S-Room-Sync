@@ -3,6 +3,26 @@ from backend.db_connection import get_db
 
 samuel = Blueprint("samuel_routes", __name__)
 
+@samuel.route('/renters/<renter_id>', methods=['GET'])
+def get_renter_info(renter_id):
+    cursor = get_db().cursor(dictionary=True)
+    try:
+        current_app.logger.info(f'GET /samuel/renters/{renter_id}')
+        
+        cursor.execute('SELECT firstName, lastName, schoolName FROM Renter WHERE renterID = %s', (renter_id,))
+        renter_info = cursor.fetchone()
+
+        if not renter_info:
+            return jsonify({"error": "Renter not found"}), 404
+
+        current_app.logger.info(f'Retrieved info for renter {renter_id}')
+        return jsonify(renter_info), 200
+    except Exception as e:
+        current_app.logger.error(f'Error retrieving info for renter {renter_id}: {e}')
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+
 @samuel.route('/renters/<renter_id>/preferences', methods=['GET'])
 def get_renter_preferences(renter_id):
     cursor = get_db().cursor(dictionary=True)
@@ -131,9 +151,11 @@ def get_renter_inquiries(renter_id):
     try:
         current_app.logger.info(f'GET /samuel/renters/{renter_id}/inquiries')
 
-        cursor.execute('''SELECT Inquiry.* FROM Inquiry
-                       JOIN Renter ON Renter.email = Inquiry.senderEmail
-                       WHERE renterID = %s''', (renter_id,))
+        cursor.execute('''SELECT 
+                              Inquiry.message, Inquiry.sentAt, Inquiry.isRead, Inquiry.response, Listing.title AS listingTitle
+                       FROM Inquiry
+                       JOIN Listing ON Listing.listingID = Inquiry.listingID
+                       WHERE Inquiry.renterID = %s''', (renter_id,))
         inquiries = cursor.fetchall()
 
         current_app.logger.info(f'Retrieved inquiries for renter {renter_id}')
@@ -152,17 +174,14 @@ def create_renter_inquiry(renter_id):
 
         data = request.json
         message = data.get('message')
-        listing_id = data.get('listing_id')
-        sender_name = data.get('sender_name')
+        listing_id = data.get('listingID')
 
-        cursor.execute('SELECT email FROM Renter WHERE renterID = %s', (renter_id,))
+        cursor.execute('SELECT renterID FROM Renter WHERE renterID = %s', (renter_id,))
         renter = cursor.fetchone()
         if not renter:
             return jsonify({"error": "Renter not found"}), 404
-        
-        sender_email = renter['email']
 
-        cursor.execute('INSERT INTO Inquiry (senderEmail, message, listingID, senderName) VALUES (%s, %s, %s, %s)', (sender_email, message, listing_id, sender_name))
+        cursor.execute('INSERT INTO Inquiry (renterID, message, listingID) VALUES (%s, %s, %s)', (renter_id, message, listing_id))
         get_db().commit()
 
         current_app.logger.info(f'Created inquiry for renter {renter_id}')
@@ -198,14 +217,71 @@ def get_classmate_listings(renter_id):
         
         cursor.execute('''SELECT DISTINCT Listing.* FROM Listing
                        JOIN Inquiry ON Listing.listingID = Inquiry.listingID
-                       JOIN Renter ON Renter.email = Inquiry.senderEmail
-                       WHERE Renter.renterID = %s''', (renter_id,))
+                       WHERE Inquiry.renterID = %s''', (renter_id,))
         listings = cursor.fetchall()
 
         current_app.logger.info(f'Retrieved classmate listings for renter {renter_id}')
         return jsonify(listings), 200
     except Exception as e:
         current_app.logger.error(f'Error retrieving classmate listings for renter {renter_id}: {e}')
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        
+@samuel.route('/renters/<renter_id>/listings', methods=['GET'])
+def get_matching_listings(renter_id):
+    # gets listing matching dealbreakers, sorted by preferences matched
+    # only availbale listings
+    cursor = get_db().cursor(dictionary=True)
+    try:
+        current_app.logger.info(f'GET /samuel/renters/{renter_id}/listings')
+        
+        # the first part filters out bad listings
+        # the sort part counts how many preferences are matched
+        # max_rent is <= rather than = for everything els e
+        cursor.execute('''SELECT Listing.listingID, Listing.title
+FROM Listing
+WHERE Listing.status = 'available'
+  AND NOT EXISTS (SELECT 1
+                  FROM Dealbreakers dealbreaker
+                           JOIN ApartmentFeatures dealbreakerFeature
+                                ON dealbreakerFeature.featureID = dealbreaker.featureID
+                  WHERE dealbreaker.renterID = %s
+                    AND NOT EXISTS (SELECT 1
+                                    FROM ApartmentAmenities amenity
+                                             JOIN ApartmentFeatures amenityFeature
+                                                  ON amenityFeature.featureID = amenity.featureID
+                                    WHERE amenity.apartmentID = Listing.apartmentID
+                                      AND (
+                                        (dealbreakerFeature.label = 'max_rent' AND amenityFeature.label = 'rent'
+                                            AND amenityFeature.value <= dealbreakerFeature.value)
+                                            OR (dealbreakerFeature.label <> 'max_rent'
+                                            AND amenityFeature.label = dealbreakerFeature.label AND
+                                                amenityFeature.value = dealbreakerFeature.value)
+                                        )))
+ORDER BY (SELECT COUNT(*)
+          FROM RenterPreferences pref
+                   JOIN ApartmentFeatures prefFeature ON prefFeature.featureID = pref.featureID
+          WHERE pref.renterID = %s
+            AND EXISTS (SELECT 1
+                        FROM ApartmentAmenities amenity
+                                 JOIN ApartmentFeatures amenityFeature ON amenityFeature.featureID = amenity.featureID
+                        WHERE amenity.apartmentID = Listing.apartmentID
+                          AND (
+                            (prefFeature.label = 'max_rent' AND amenityFeature.label = 'rent'
+                                AND
+                             amenityFeature.value <= prefFeature.value)
+                                OR (prefFeature.label <> 'max_rent'
+                                AND amenityFeature.label = prefFeature.label AND
+                                    amenityFeature.value = prefFeature.value)
+                            ))) DESC''', (renter_id, renter_id))
+
+        listings = cursor.fetchall()
+
+        current_app.logger.info(f'Retrieved matching listings for renter {renter_id}')
+        return jsonify(listings), 200
+    except Exception as e:
+        current_app.logger.error(f'Error retrieving matching listings for renter {renter_id}: {e}')
         return jsonify({"error": str(e)}), 500
     finally:
         cursor.close()

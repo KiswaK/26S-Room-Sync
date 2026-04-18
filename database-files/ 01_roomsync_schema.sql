@@ -140,6 +140,7 @@ CREATE TABLE Listing (
    landlordID      INT NOT NULL,
    brokerID        INT,
    renterID        INT,
+   title           VARCHAR(200) NOT NULL,
    availableDate   DATE         NOT NULL,
    status          VARCHAR(50)  NOT NULL DEFAULT 'available',
    cosignerName    VARCHAR(100),
@@ -173,13 +174,16 @@ CREATE TABLE ListingImage (
 CREATE TABLE Inquiry (
    inquiryID   INT AUTO_INCREMENT,
    listingID   INT NOT NULL,
-   senderName  VARCHAR(100) NOT NULL,
-   senderEmail VARCHAR(100) NOT NULL,
+   renterID    INT NOT NULL,
    message     TEXT         NOT NULL,
+   response    TEXT,
    sentAt      DATE         NOT NULL DEFAULT (CURRENT_DATE),
    isRead      BOOLEAN      NOT NULL DEFAULT FALSE,
    PRIMARY KEY(inquiryID),
    FOREIGN KEY (listingID) REFERENCES Listing(listingID)
+       ON UPDATE CASCADE
+       ON DELETE RESTRICT,
+   FOREIGN KEY (renterID) REFERENCES Renter(renterID)
        ON UPDATE CASCADE
        ON DELETE RESTRICT
 );

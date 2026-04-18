@@ -77,6 +77,5 @@ if st.button('Act as Samuel, a student searching for an apartment',
              use_container_width=True):
     st.session_state['authenticated'] = True
     st.session_state['role'] = 'renter'
-    st.session_state['first_name'] = 'Samuel'
     st.session_state['renter_id'] = 33
     st.switch_page('pages/40_Renter_Home.py')
