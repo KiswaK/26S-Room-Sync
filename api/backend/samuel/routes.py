@@ -131,9 +131,11 @@ def get_renter_inquiries(renter_id):
     try:
         current_app.logger.info(f'GET /samuel/renters/{renter_id}/inquiries')
 
-        cursor.execute('''SELECT Inquiry.* FROM Inquiry
-                       JOIN Renter ON Renter.email = Inquiry.senderEmail
-                       WHERE renterID = %s''', (renter_id,))
+        cursor.execute('''SELECT 
+                              Inquiry.message, Inquiry.sentAt, Inquiry.isRead, Inquiry.response, Listing.title AS listingTitle
+                       FROM Inquiry
+                       JOIN Listing ON Listing.listingID = Inquiry.listingID
+                       WHERE Inquiry.renterID = %s''', (renter_id,))
         inquiries = cursor.fetchall()
 
         current_app.logger.info(f'Retrieved inquiries for renter {renter_id}')
@@ -153,16 +155,13 @@ def create_renter_inquiry(renter_id):
         data = request.json
         message = data.get('message')
         listing_id = data.get('listing_id')
-        sender_name = data.get('sender_name')
 
-        cursor.execute('SELECT email FROM Renter WHERE renterID = %s', (renter_id,))
+        cursor.execute('SELECT renterID FROM Renter WHERE renterID = %s', (renter_id,))
         renter = cursor.fetchone()
         if not renter:
             return jsonify({"error": "Renter not found"}), 404
-        
-        sender_email = renter['email']
 
-        cursor.execute('INSERT INTO Inquiry (senderEmail, message, listingID, senderName) VALUES (%s, %s, %s, %s)', (sender_email, message, listing_id, sender_name))
+        cursor.execute('INSERT INTO Inquiry (renterID, message, listingID) VALUES (%s, %s, %s)', (renter_id, message, listing_id))
         get_db().commit()
 
         current_app.logger.info(f'Created inquiry for renter {renter_id}')
@@ -198,8 +197,7 @@ def get_classmate_listings(renter_id):
         
         cursor.execute('''SELECT DISTINCT Listing.* FROM Listing
                        JOIN Inquiry ON Listing.listingID = Inquiry.listingID
-                       JOIN Renter ON Renter.email = Inquiry.senderEmail
-                       WHERE Renter.renterID = %s''', (renter_id,))
+                       WHERE Inquiry.renterID = %s''', (renter_id,))
         listings = cursor.fetchall()
 
         current_app.logger.info(f'Retrieved classmate listings for renter {renter_id}')

@@ -85,6 +85,11 @@ def set_preferences_nav():
         "pages/41_Preferences.py", label="Set Preferences", icon="⚙️"
     )
 
+def inquiries_nav():
+    st.sidebar.page_link(
+        "pages/42_Inquiries.py", label="View/Send Inquiries", icon="📬"
+    )
+
 # ---- Sidebar assembly -------------------------------------------------------
 
 def SideBarLinks(show_home=False):
@@ -126,6 +131,7 @@ def SideBarLinks(show_home=False):
         if st.session_state["role"] == "renter":
             renter_home_nav()
             set_preferences_nav()
+            inquiries_nav()
 
     # About link appears at the bottom for all roles
     about_page_nav()
