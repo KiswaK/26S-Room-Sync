@@ -216,25 +216,6 @@ def get_matching_listings(renter_id):
     try:
         current_app.logger.info(f'GET /samuel/renters/{renter_id}/listings')
         
-        # we already have stuff to get the dealbreakers and prefs tso just use those
-        dealbreakers = get_renter_dealbreakers(renter_id)[0].get_json()
-        preferences = get_renter_preferences(renter_id)[0].get_json()
-        
-        # take out the max rent stuff to make it easier
-        # (they are special case)
-        max_rent_dealbreaker = None
-        for dealbreaker in dealbreakers:
-            if dealbreaker['label'] == 'max_rent':
-                max_rent_dealbreaker = float(dealbreaker['value'])
-                dealbreakers.remove(dealbreaker)
-                break
-        max_rent_pref = None
-        for pref in preferences:
-            if pref['label'] == 'max_rent':
-                max_rent_pref = float(pref['value'])
-                preferences.remove(pref)
-                break
-        
         # the first part filters out bad listings
         # the sort part counts how many preferences are matched
         # max_rent is <= rather than = for everything els e
