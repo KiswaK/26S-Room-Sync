@@ -25,7 +25,7 @@ def get_landlord_listings(landlord_id):
     return make_response(jsonify(rows), 200)
 
 
-# 2.1 — Post a new listing
+# Post a new listing
 @landlord.route('/landlord/<int:landlord_id>/listings', methods=['POST'])
 def create_listing(landlord_id):
     data       = request.get_json()
