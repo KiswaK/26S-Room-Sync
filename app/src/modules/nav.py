@@ -90,6 +90,11 @@ def inquiries_nav():
         "pages/42_Inquiries.py", label="View/Send Inquiries", icon="📬"
     )
 
+def classmate_listings_nav():
+    st.sidebar.page_link(
+        "pages/43_Classmate_Listings.py", label="Classmate Listings", icon="🎓"
+    )
+
 # ---- Sidebar assembly -------------------------------------------------------
 
 def SideBarLinks(show_home=False):
@@ -132,6 +137,7 @@ def SideBarLinks(show_home=False):
             renter_home_nav()
             set_preferences_nav()
             inquiries_nav()
+            classmate_listings_nav()
 
     # About link appears at the bottom for all roles
     about_page_nav()

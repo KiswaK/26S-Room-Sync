@@ -3,6 +3,26 @@ from backend.db_connection import get_db
 
 samuel = Blueprint("samuel_routes", __name__)
 
+@samuel.route('/renters/<renter_id>', methods=['GET'])
+def get_renter_info(renter_id):
+    cursor = get_db().cursor(dictionary=True)
+    try:
+        current_app.logger.info(f'GET /samuel/renters/{renter_id}')
+        
+        cursor.execute('SELECT firstName, lastName, schoolName FROM Renter WHERE renterID = %s', (renter_id,))
+        renter_info = cursor.fetchone()
+
+        if not renter_info:
+            return jsonify({"error": "Renter not found"}), 404
+
+        current_app.logger.info(f'Retrieved info for renter {renter_id}')
+        return jsonify(renter_info), 200
+    except Exception as e:
+        current_app.logger.error(f'Error retrieving info for renter {renter_id}: {e}')
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+
 @samuel.route('/renters/<renter_id>/preferences', methods=['GET'])
 def get_renter_preferences(renter_id):
     cursor = get_db().cursor(dictionary=True)
