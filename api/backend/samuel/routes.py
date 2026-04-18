@@ -33,11 +33,8 @@ def update_renter_preferences(renter_id):
 
         cursor.execute('DELETE FROM RenterPreferences WHERE renterID = %s', (renter_id,))
 
-        for pref in preferences:
-            key = pref.get('label')
-            value = pref.get('value')
-
-            # check if the feature alread y exists
+        for key, value in preferences.items():
+            # check if the feature already exists
             cursor.execute('SELECT featureId FROM ApartmentFeatures WHERE label = %s AND value = %s', (key, value))
             feature = cursor.fetchone()
             if not feature:
@@ -50,9 +47,60 @@ def update_renter_preferences(renter_id):
 
         get_db().commit()
         current_app.logger.info(f'Updated preferences for renter {renter_id}')
-        return jsonify({"message": "Preferences updated successfully"}), 200
+        return jsonify({"message": "Preferences updated successfully"}), 201
     except Exception as e:
         current_app.logger.error(f'Error updating preferences for renter {renter_id}: {e}')
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+
+@samuel.route('/renters/<renter_id>/deal_breakers', methods=['GET'])
+def get_renter_dealbreakers(renter_id):
+    cursor = get_db().cursor(dictionary=True)
+    try:
+        current_app.logger.info(f'GET /samuel/renters/{renter_id}/dealbreakers')
+
+        cursor.execute('''SELECT label, value FROM Dealbreakers
+                       JOIN ApartmentFeatures features ON Dealbreakers.featureId = features.featureId
+                       WHERE renterID = %s''', (renter_id,))
+
+        dealbreakers = cursor.fetchall()
+
+        current_app.logger.info(f'Retrieved dealbreakers for renter {renter_id}')
+        return jsonify(dealbreakers), 200
+    except Exception as e:
+        current_app.logger.error(f'Error retrieving dealbreakers for renter {renter_id}: {e}')
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+
+@samuel.route('/renters/<renter_id>/deal_breakers', methods=['PUT'])
+def update_renter_dealbreakers(renter_id):
+    cursor = get_db().cursor(dictionary=True)
+    try:
+        current_app.logger.info(f'PUT /samuel/renters/{renter_id}/dealbreakers')
+
+        dealbreakers = request.json
+
+        cursor.execute('DELETE FROM Dealbreakers WHERE renterID = %s', (renter_id,))
+
+        for key, value in dealbreakers.items():
+            # check if the feature already exists
+            cursor.execute('SELECT featureId FROM ApartmentFeatures WHERE label = %s AND value = %s', (key, value))
+            feature = cursor.fetchone()
+            if not feature:
+                cursor.execute('INSERT INTO ApartmentFeatures (label, value) VALUES (%s, %s)', (key, value))
+                feature_id = cursor.lastrowid
+            else:
+                feature_id = feature['featureId']
+
+            cursor.execute('INSERT INTO Dealbreakers (renterID, featureId) VALUES (%s, %s)', (renter_id, feature_id))
+
+        get_db().commit()
+        current_app.logger.info(f'Updated dealbreakers for renter {renter_id}')
+        return jsonify({"message": "Dealbreakers updated successfully"}), 201
+    except Exception as e:
+        current_app.logger.error(f'Error updating dealbreakers for renter {renter_id}: {e}')
         return jsonify({"error": str(e)}), 500
     finally:
         cursor.close()

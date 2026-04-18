@@ -76,6 +76,14 @@ def ml_model_mgmt_nav():
         "pages/21_ML_Model_Mgmt.py", label="ML Model Management", icon="🏢"
     )
 
+# ---- Role: renter -----------------------------------------------------------
+def renter_home_nav():
+    st.sidebar.page_link("pages/40_Renter_Home.py", label="Renter Home", icon="👤")
+
+def set_preferences_nav():
+    st.sidebar.page_link(
+        "pages/41_Preferences.py", label="Set Preferences", icon="⚙️"
+    )
 
 # ---- Sidebar assembly -------------------------------------------------------
 
@@ -114,6 +122,10 @@ def SideBarLinks(show_home=False):
         if st.session_state["role"] == "administrator":
             admin_home_nav()
             ml_model_mgmt_nav()
+        
+        if st.session_state["role"] == "renter":
+            renter_home_nav()
+            set_preferences_nav()
 
     # About link appears at the bottom for all roles
     about_page_nav()
