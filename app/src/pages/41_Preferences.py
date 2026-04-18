@@ -109,7 +109,7 @@ with st.form(f"set_prefs_form_{st.session_state.form_key_counter}"):
 
     col_bath, col_bath_db = st.columns([4, 1])
     with col_bath:
-        bathrooms = st.number_input("Number of Bathrooms", min_value=0, value=get_default_value("bathrooms", float))
+        bathrooms = st.number_input("Number of Bathrooms", min_value=0.0, value=get_default_value("bathrooms", float))
     with col_bath_db:
         st.markdown("<br>", unsafe_allow_html=True)
         bathrooms_dealbreaker = st.toggle("Dealbreaker", key="bathrooms_dealbreaker", value=is_dealbreaker("bathrooms"))
