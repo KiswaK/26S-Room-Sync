@@ -23,7 +23,7 @@ def get_all_listings():
         return jsonify({"error": str(e)}), 500
     finally:
         cursor.close()
-    
+
 @sienna.route('/admin/listings', methods = ['PUT'])
 def bulk_deactivate_listings():
     cursor = get_db().cursor(dictionary = True)
