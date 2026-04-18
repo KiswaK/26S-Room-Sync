@@ -242,7 +242,7 @@ insert into Renter (renterID, userID, firstName, lastName, email, phoneNumber, s
 insert into Renter (renterID, userID, firstName, lastName, email, phoneNumber, schoolName, income) values (35, 32, 'Daniel', 'Cawthry', 'dcawthryy@furl.net', '883-406-7894', 'Boston University', 80306.19);
 
 
-insert into Admin (adminID, userID, adminName, adminEmail, roleTitle) values (1, 11, 'Rosa Ding', 'rding0@gravatar.com', 'Platform Administrator');
+insert into Admin (adminID, userID, adminName, adminEmail, roleTitle) values (1, 11, 'Sienna Garrison', 'sienna@gravatar.com', 'Platform Administrator');
 insert into Admin (adminID, userID, adminName, adminEmail, roleTitle) values (2, 32, 'Cori Voysey', 'cvoysey1@hostgator.com', 'Data Moderator');
 insert into Admin (adminID, userID, adminName, adminEmail, roleTitle) values (3, 4, 'Mack Grolmann', 'mgrolmann2@unc.edu', 'Data Moderator');
 insert into Admin (adminID, userID, adminName, adminEmail, roleTitle) values (4, 14, 'Ciel Thulborn', 'cthulborn3@wikipedia.org', 'Data Moderator');
