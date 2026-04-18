@@ -1,33 +1,78 @@
-import logging
-
-logger = logging.getLogger(__name__)
+from datetime import date
 
 import streamlit as st
+
 from modules.nav import SideBarLinks
-import requests
+from modules.roomsync import api_request, show_api_error
 
 st.set_page_config(layout="wide")
-
-# Display the appropriate sidebar links for the role of the logged in user
 SideBarLinks()
 
-st.title("Prediction with Regression")
+broker_id = st.session_state["broker_id"]
+st.title("Assigned Listings")
 
-# create a 2 column layout
-col1, col2 = st.columns(2)
+ok, _, payload = api_request("GET", f"/ben/brokers/{broker_id}/listings")
+if not ok:
+    show_api_error(payload)
+    listings = []
+else:
+    listings = payload
 
-# add one number input for variable 1 into column 1
-with col1:
-    var_01 = st.number_input("Variable 01:", step=1)
+st.dataframe(listings, use_container_width=True)
 
-# add another number input for variable 2 into column 2
-with col2:
-    var_02 = st.number_input("Variable 02:", step=1)
+listing_options = {f"{item['listingID']} - {item['title']}": item for item in listings}
 
-# add a button to use the values entered into the number field to send to the
-# prediction function via the REST API
-if st.button("Calculate Prediction", type="primary", use_container_width=True):
-    logger.info(f"var_01 = {var_01}, var_02 = {var_02}")
-    results = requests.get(f"http://web-api:4000/prediction/{var_01}/{var_02}")
-    json_results = results.json()
-    st.dataframe(json_results)
+if listing_options:
+    selected_key = st.selectbox("Choose listing", list(listing_options.keys()))
+    selected_listing = listing_options[selected_key]
+
+    with st.form("broker_update_form"):
+        updated_title = st.text_input("Title", value=selected_listing["title"])
+        updated_status = st.selectbox(
+            "Status",
+            ["available", "inactive", "rented", "archived"],
+            index=["available", "inactive", "rented", "archived"].index(selected_listing["status"])
+            if selected_listing["status"] in ["available", "inactive", "rented", "archived"]
+            else 0,
+        )
+        updated_date = st.date_input(
+            "Available date",
+            value=date.fromisoformat(str(selected_listing["availableDate"])),
+        )
+        updated_fee = st.number_input(
+            "Broker fee",
+            min_value=0.0,
+            step=50.0,
+            value=float(selected_listing["brokerFee"] or 0),
+        )
+        save_button = st.form_submit_button("Update Listing")
+
+    if save_button:
+        ok, _, response_payload = api_request(
+            "PUT",
+            f"/ben/brokers/{broker_id}/listings/{selected_listing['listingID']}",
+            json={
+                "title": updated_title,
+                "status": updated_status,
+                "availableDate": str(updated_date),
+                "brokerFee": updated_fee,
+            },
+        )
+        if ok:
+            st.success("Listing updated.")
+            st.rerun()
+        else:
+            show_api_error(response_payload)
+
+    if st.button("Remove Listing From My Portfolio", type="primary"):
+        ok, _, response_payload = api_request(
+            "DELETE",
+            f"/ben/brokers/{broker_id}/listings/{selected_listing['listingID']}",
+        )
+        if ok:
+            st.success("Listing removed from broker portfolio.")
+            st.rerun()
+        else:
+            show_api_error(response_payload)
+else:
+    st.info("This broker has no assigned listings.")
