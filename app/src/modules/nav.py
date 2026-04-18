@@ -37,7 +37,7 @@ def map_demo_nav():
 
 def usaid_worker_home_nav():
     st.sidebar.page_link(
-        "pages/10_USAID_Worker_Home.py", label="USAID Worker Home", icon="🏠"
+        "pages/10_Broker_Home.py", label="Broker Home", icon="🏠"
     )
 
 
@@ -51,17 +51,17 @@ def add_ngo_nav():
 
 def prediction_nav():
     st.sidebar.page_link(
-        "pages/11_Prediction.py", label="Regression Prediction", icon="📈"
+        "pages/11_Assigned_Listings.py", label="Assigned Listing", icon="📈"
     )
 
 
 def api_test_nav():
-    st.sidebar.page_link("pages/12_API_Test.py", label="Test the API", icon="🛜")
+    st.sidebar.page_link("pages/12_Market_Performance.py", label="Market Performance", icon="🛜")
 
 
 def classification_nav():
     st.sidebar.page_link(
-        "pages/13_Classification.py", label="Classification Demo", icon="🌺"
+        "pages/13_Inquiries_Workload.py", label="Inquiries Workload", icon="🌺"
     )
 
 
