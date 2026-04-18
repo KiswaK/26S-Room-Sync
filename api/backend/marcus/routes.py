@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, make_response
 from backend.db_connection import db
 
-landlord = Blueprint('landlord', __name__)
+marcus = Blueprint("marcus_routes", __name__)
 
 
 
