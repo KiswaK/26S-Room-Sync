@@ -33,7 +33,7 @@ SideBarLinks(show_home=True)
 # ***************************************************
 
 logger.info("Loading the Home page of the app")
-st.title('CS 3200 Project Template')
+st.title('RoomSync')
 st.write('#### Hi! As which user would you like to log in?')
 
 # For each of the user personas for which we are implementing
@@ -70,3 +70,12 @@ if st.button('Act as System Administrator',
     st.session_state['role'] = 'administrator'
     st.session_state['first_name'] = 'SysAdmin'
     st.switch_page('pages/20_Admin_Home.py')
+
+if st.button('Act as Samuel, a student searching for an apartment',
+             type='primary',
+             use_container_width=True):
+    st.session_state['authenticated'] = True
+    st.session_state['role'] = 'renter'
+    st.session_state['first_name'] = 'Samuel'
+    st.session_state['renter_id'] = 33
+    st.switch_page('pages/40_Renter_Home.py')
