@@ -61,7 +61,7 @@ if st.button('Act as Mohammad, a USAID Worker',
     st.session_state['authenticated'] = True
     st.session_state['role'] = 'usaid_worker'
     st.session_state['first_name'] = 'Mohammad'
-    st.switch_page('pages/10_USAID_Worker_Home.py')
+    st.switch_page('pages/10_Broker_Home.py')
 
 if st.button('Act as Sienna, a System Administrator',
              type='primary',
