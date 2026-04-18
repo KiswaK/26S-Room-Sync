@@ -8,6 +8,7 @@ from backend.simple.simple_routes import simple_routes
 from backend.ngos.ngo_routes import ngos
 from backend.samuel.routes import samuel
 from backend.sienna.routes import sienna
+from backend.ben.routes import ben
 
 
 def create_app():
@@ -41,5 +42,6 @@ def create_app():
     app.register_blueprint(ngos, url_prefix="/ngo")
     app.register_blueprint(samuel, url_prefix="/samuel")
     app.register_blueprint(sienna, url_prefix="/sienna")
+    app.register_blueprint(ben, url_prefix="/ben")
 
     return app
