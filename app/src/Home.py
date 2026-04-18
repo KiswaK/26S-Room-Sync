@@ -63,12 +63,13 @@ if st.button('Act as Mohammad, a USAID Worker',
     st.session_state['first_name'] = 'Mohammad'
     st.switch_page('pages/10_USAID_Worker_Home.py')
 
-if st.button('Act as System Administrator',
+if st.button('Act as Sienna, a System Administrator',
              type='primary',
              use_container_width=True):
     st.session_state['authenticated'] = True
     st.session_state['role'] = 'administrator'
-    st.session_state['first_name'] = 'SysAdmin'
+    st.session_state['first_name'] = 'Sienna'
+    st.session_state['admin_id'] = 11
     st.switch_page('pages/20_Admin_Home.py')
 
 if st.button('Act as Samuel, a student searching for an apartment',
