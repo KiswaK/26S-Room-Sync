@@ -16,5 +16,4 @@ if st.button("Market Performance", type="primary", use_container_width=True):
 
 if st.button("Inquiries and Workload", type="primary", use_container_width=True):
     st.switch_page("pages/13_Inquiries_Workload.py")
-             use_container_width=True):
-    st.switch_page('pages/13_Inquiries_Workload.py')
+
