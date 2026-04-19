@@ -5,7 +5,7 @@ from backend.db_connection import get_db
 ben = Blueprint("ben_routes", __name__)
 
 
-# 4.1 - GET all listings assigned to this broker with performance data
+#GET all listings assigned to this broker
 @ben.route("/brokers/<int:broker_id>/listings", methods=["GET"])
 def get_broker_listings(broker_id):
     cursor = get_db().cursor(dictionary=True)
@@ -42,7 +42,7 @@ def get_broker_listings(broker_id):
         cursor.close()
 
 
-# 4.2 / 4.6 - GET performance across all apartments with interest classification
+#GET performance across all apartments
 @ben.route("/brokers/performance", methods=["GET"])
 def get_brokers_performance():
     cursor = get_db().cursor(dictionary=True)
@@ -80,7 +80,7 @@ def get_brokers_performance():
         cursor.close()
 
 
-# 4.3 - GET inquiry counts per listing for this broker
+#GET inquiry counts per listing for this broker
 @ben.route("/brokers/<int:broker_id>/inquiries", methods=["GET"])
 def get_broker_inquiries(broker_id):
     cursor = get_db().cursor(dictionary=True)
@@ -109,7 +109,7 @@ def get_broker_inquiries(broker_id):
         cursor.close()
 
 
-# 4.4 - GET listings grouped by status with inquiry totals
+#GET listings grouped by status with inquiry totals
 @ben.route("/brokers/<int:broker_id>/listings-by-status", methods=["GET"])
 def get_listings_by_status(broker_id):
     cursor = get_db().cursor(dictionary=True)
@@ -137,7 +137,7 @@ def get_listings_by_status(broker_id):
         cursor.close()
 
 
-# 4.5 - GET workload distribution across all brokers
+#GET workload distribution across all brokers
 @ben.route("/brokers/workload", methods=["GET"])
 def get_broker_workload():
     cursor = get_db().cursor(dictionary=True)
@@ -163,7 +163,7 @@ def get_broker_workload():
         cursor.close()
 
 
-# POST - Create a new performance report for an apartment [Ben-6]
+#POST Create a new performance report for an apartment
 @ben.route("/brokers/<int:broker_id>/reports", methods=["POST"])
 def create_performance_report(broker_id):
     cursor = get_db().cursor(dictionary=True)
@@ -199,7 +199,7 @@ def create_performance_report(broker_id):
         cursor.close()
 
 
-# PUT - Update listing details on behalf of landlord [Ben-1]
+# PUT Update listing details on behalf of landlord
 @ben.route("/brokers/<int:broker_id>/listings/<int:listing_id>", methods=["PUT"])
 def update_broker_listing(broker_id, listing_id):
     cursor = get_db().cursor(dictionary=True)
@@ -241,7 +241,7 @@ def update_broker_listing(broker_id, listing_id):
         cursor.close()
 
 
-# DELETE - Remove listing from broker portfolio [Ben-1]
+# DELETE Remove listing from broker portfolio
 @ben.route("/brokers/<int:broker_id>/listings/<int:listing_id>", methods=["DELETE"])
 def remove_broker_listing(broker_id, listing_id):
     cursor = get_db().cursor(dictionary=True)
