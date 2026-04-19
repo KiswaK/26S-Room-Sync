@@ -15,25 +15,30 @@ def about_page_nav():
     st.sidebar.page_link("pages/30_About.py", label="About", icon="🧠")
 
 
-# ---- Role: pol_strat_advisor ------------------------------------------------
+# ---- Role: landlord ------------------------------------------------
 
-def pol_strat_home_nav():
+def landlord_home_nav():
     st.sidebar.page_link(
-        "pages/00_Pol_Strat_Home.py", label="Political Strategist Home", icon="👤"
+        "pages/30_Landlord_Home.py", label="Landlord Home", icon="👤"
+    )
+
+def my_listings_nav():
+    st.sidebar.page_link(
+        "pages/31_My_Listings.py", label="My Listings", icon="🏠"
     )
 
 
-def world_bank_viz_nav():
+def inquiries_inbox_nav():
     st.sidebar.page_link(
-        "pages/01_World_Bank_Viz.py", label="World Bank Visualization", icon="🏦"
+        "pages/32_Inquiries_Inbox.py", label="Inquiries", icon="📬"
     )
 
 
-def map_demo_nav():
-    st.sidebar.page_link("pages/02_Map_Demo.py", label="Map Demonstration", icon="🗺️")
+def performance_nav():
+    st.sidebar.page_link("pages/33_Performance.py", label="Performance", icon="📊")
 
 
-# ---- Role: usaid_worker -----------------------------------------------------
+# ---- Role: broker -----------------------------------------------------
 
 def usaid_worker_home_nav():
     st.sidebar.page_link(
@@ -149,6 +154,12 @@ def SideBarLinks(show_home=False):
             set_preferences_nav()
             inquiries_nav()
             classmate_listings_nav()
+
+        if st.session_state["role"] == "landlord":
+            landlord_home_nav()
+            my_listings_nav()
+            inquiries_inbox_nav()
+            performance_nav()
 
     # About link appears at the bottom for all roles
     about_page_nav()
