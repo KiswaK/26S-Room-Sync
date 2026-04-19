@@ -12,7 +12,7 @@ st.title("Assigned Listings")
 
 API_BASE = "http://web-api:4000/ben"
 
-# ── Helper to parse dates from the API ──────────────────────────────
+#parser
 def parse_date(value):
     """Handle both '2025-04-04' and 'Fri, 04 Apr 2025 00:00:00 GMT' formats."""
     if not value:
@@ -30,7 +30,7 @@ def parse_date(value):
         pass
     return date.today()
 
-# ── Fetch listings ──────────────────────────────────────────────────
+#fetch
 listings = []
 try:
     response = requests.get(f"{API_BASE}/brokers/{broker_id}/listings")
@@ -48,12 +48,12 @@ if not listings:
 
 st.dataframe(listings, use_container_width=True, hide_index=True)
 
-# ── Select a listing to edit ────────────────────────────────────────
+#select listing for edit
 listing_options = {f"{item['listingID']} - {item['title']}": item for item in listings}
 selected_key = st.selectbox("Choose listing", list(listing_options.keys()))
 selected_listing = listing_options[selected_key]
 
-# ── Update form (PUT) ───────────────────────────────────────────────
+#PUT
 with st.form("broker_update_form"):
     updated_title = st.text_input("Title", value=selected_listing["title"])
     updated_status = st.selectbox(
@@ -93,8 +93,7 @@ with st.form("broker_update_form"):
                 st.error(f"Failed to update listing: {response.json().get('error', 'Unknown error')}")
         except requests.exceptions.RequestException as e:
             st.error(f"Error connecting to the API: {str(e)}")
-
-# ── Remove listing (DELETE) ─────────────────────────────────────────
+#DELETE listing
 if st.button("Remove Listing From My Portfolio", type="primary"):
     try:
         response = requests.delete(
