@@ -70,12 +70,6 @@ def classification_nav():
 def admin_home_nav():
     st.sidebar.page_link("pages/20_Admin_Home.py", label="System Admin Homepage", icon="🖥️")
 
-
-def ml_model_mgmt_nav():
-    st.sidebar.page_link(
-        "pages/21_ML_Model_Mgmt.py", label="ML Model Management", icon="🏢"
-    )
-
 def review_listings_nav():
     st.sidebar.page_link(
         "pages/22_Review_Listing.py", label="Listings", icon="🗒️"
@@ -84,6 +78,11 @@ def review_listings_nav():
 def review_users_nav():
     st.sidebar.page_link(
         "pages/23_Review_Users.py", label="Users", icon="👤"
+    )
+
+def view_processed_user_listing():
+    st.sidebar.page_link(
+        "pages/24_View_processed_userList.py", label="Processed User/Listings", icon="📋"
     )
 
 # ---- Role: renter -----------------------------------------------------------
@@ -141,9 +140,9 @@ def SideBarLinks(show_home=False):
 
         if st.session_state["role"] == "administrator":
             admin_home_nav()
-            ml_model_mgmt_nav()
             review_listings_nav()
             review_users_nav()
+            view_processed_user_listing()
         
         if st.session_state["role"] == "renter":
             renter_home_nav()
