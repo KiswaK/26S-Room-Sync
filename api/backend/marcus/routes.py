@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, make_response
-from backend.db_connection import db
+from backend.db_connection import get_db
 
 marcus = Blueprint("marcus_routes", __name__)
 
