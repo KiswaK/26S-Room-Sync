@@ -8,7 +8,7 @@ marcus = Blueprint("marcus_routes", __name__)
 # Get all active listings for a landlord
 @marcus.route('/landlord/<int:landlord_id>/listings', methods=['GET'])
 def get_landlord_listings(landlord_id):
-    cursor = db.get_db().cursor(dictionary=True) 
+    cursor = get_db().cursor(dictionary=True) 
     cursor.execute('''
         SELECT l.listingID,
                a.unitNumber,
@@ -36,7 +36,7 @@ def create_listing(landlord_id):
     broker_fee = data.get('brokerFee', 0.00)
     cosigner   = data.get('cosignerName', None)
 
-    cursor = db.get_db().cursor(dictionary=True) 
+    cursor = get_db().cursor(dictionary=True) 
     cursor.execute('''
         INSERT INTO Listing (
             title,
@@ -51,7 +51,7 @@ def create_listing(landlord_id):
         )
         VALUES (%s, %s, %s, %s, NULL, %s, 'available', %s, %s)
     ''', (title, apt_id, landlord_id, broker_id, avail_date, cosigner, broker_fee))
-    db.get_db().commit()
+    get_db().commit()
     return make_response(jsonify({'message': 'Listing created successfully'}), 201)
 
 
