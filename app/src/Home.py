@@ -49,10 +49,10 @@ if st.button("Act as Marcus, a Landord",
     st.session_state['role'] = 'landlord'
     # we add the first name of the user (so it can be displayed on
     # subsequent pages).
-    st.session_state['first_name'] = 'Marcus'
+    st.session_state['first_name'] = 'Eliot'
     # finally, we ask streamlit to switch to another page, in this case, the
     # landing page for this particular user type
-    st.session_state['landlord_id'] = 30
+    st.session_state['landlord_id'] = 28
     st.switch_page('pages/30_Landlord_Home.py')
 
 if st.button('Act as Ben, a Broker',

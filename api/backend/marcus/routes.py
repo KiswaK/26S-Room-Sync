@@ -60,28 +60,28 @@ def update_listing_status(landlord_id, listing_id):
     data   = request.get_json()
     status = data['status']
 
-    cursor = db.get_db().cursor(dictionary=True) 
+    cursor = get_db().cursor(dictionary=True) 
     cursor.execute('''
         UPDATE Listing
         SET    status = %s
         WHERE  listingID  = %s
         AND    landlordID = %s
     ''', (status, listing_id, landlord_id))
-    db().commit()
+    get_db().commit()
     return make_response(jsonify({'message': f'Listing {listing_id} status updated to {status}'}), 200)
 
 
 # Archive a listing
 @marcus.route('/landlord/<int:landlord_id>/listings/<int:listing_id>', methods=['DELETE'])
 def archive_listing(landlord_id, listing_id):
-    cursor = db.get_db().cursor(dictionary=True) 
+    cursor = get_db().cursor(dictionary=True) 
     cursor.execute('''
         UPDATE Listing
         SET    status = 'archived'
         WHERE  listingID  = %s
         AND    landlordID = %s
     ''', (listing_id, landlord_id))
-    db().commit()
+    get_db().commit()
     return make_response(jsonify({'message': f'Listing {listing_id} archived'}), 200)
 
 
@@ -91,7 +91,7 @@ def reopen_listing(landlord_id, listing_id):
     data       = request.get_json()
     avail_date = data.get('availableDate')
 
-    cursor = db.get_db().cursor(dictionary=True) 
+    cursor = get_db().cursor(dictionary=True) 
     cursor.execute('''
         UPDATE Listing
         SET    status        = 'available',
@@ -99,7 +99,7 @@ def reopen_listing(landlord_id, listing_id):
         WHERE  listingID  = %s
         AND    landlordID = %s
     ''', (avail_date, listing_id, landlord_id))
-    db().commit()
+    get_db().commit()
     return make_response(jsonify({'message': f'Listing {listing_id} reopened'}), 200)
 
 
@@ -136,7 +136,7 @@ def get_listing_performance(landlord_id):
 # Get performance report for a single listing
 @marcus.route('/landlord/<int:landlord_id>/listings/<int:listing_id>/performance', methods=['GET'])
 def get_single_listing_performance(landlord_id, listing_id):
-    cursor = db.get_db().cursor(dictionary=True) 
+    cursor = get_db().cursor(dictionary=True) 
     cursor.execute('''
         SELECT pr.reportID,
                pr.viewCount,
@@ -156,7 +156,7 @@ def get_single_listing_performance(landlord_id, listing_id):
 # Get all inquiries for a specific listing
 @marcus.route('/landlord/<int:landlord_id>/listings/<int:listing_id>/inquiries', methods=['GET'])
 def get_listing_inquiries(landlord_id, listing_id):
-    cursor = db.get_db().cursor(dictionary=True)
+    cursor = get_db().cursor(dictionary=True)
     try:
         cursor.execute('''
             SELECT i.inquiryID,
@@ -178,7 +178,7 @@ def get_listing_inquiries(landlord_id, listing_id):
 # 
 @marcus.route('/landlord/<int:landlord_id>/inquiries/<int:inquiry_id>/read', methods=['PUT'])
 def mark_inquiry_read(landlord_id, inquiry_id):
-    cursor = db.get_db().cursor(dictionary=True) 
+    cursor = get_db().cursor(dictionary=True) 
     cursor.execute('''
         UPDATE Inquiry i
         JOIN   Listing l ON i.listingID = l.listingID
@@ -186,21 +186,21 @@ def mark_inquiry_read(landlord_id, inquiry_id):
         WHERE  i.inquiryID  = %s
         AND    l.landlordID = %s
     ''', (inquiry_id, landlord_id))
-    db().commit()
+    get_db().commit()
     return make_response(jsonify({'message': f'Inquiry {inquiry_id} marked as read'}), 200)
 
 
 # Delete a specific inquiry
 @marcus.route('/landlord/<int:landlord_id>/inquiries/<int:inquiry_id>', methods=['DELETE'])
 def delete_inquiry(landlord_id, inquiry_id):
-    cursor = db.get_db().cursor(dictionary=True) 
+    cursor = get_db().cursor(dictionary=True) 
     cursor.execute('''
         DELETE i FROM Inquiry i
         JOIN   Listing l ON i.listingID = l.listingID
         WHERE  i.inquiryID  = %s
         AND    l.landlordID = %s
     ''', (inquiry_id, landlord_id))
-    db().commit()
+    get_db().commit()
     return make_response(jsonify({'message': f'Inquiry {inquiry_id} deleted'}), 200)
 
 
@@ -209,7 +209,7 @@ def delete_inquiry(landlord_id, inquiry_id):
 # Get all apartments belonging to a landlord
 @marcus.route('/landlord/<int:landlord_id>/apartments', methods=['GET'])
 def get_landlord_apartments(landlord_id):
-    cursor = db.get_db().cursor(dictionary=True) 
+    cursor = get_db().cursor(dictionary=True) 
     cursor.execute('''
         SELECT DISTINCT a.apartmentID,
                         a.unitNumber
@@ -227,11 +227,11 @@ def add_apartment(landlord_id):
     data        = request.get_json()
     unit_number = data['unitNumber']
 
-    cursor = db.get_db().cursor(dictionary=True) 
+    cursor = get_db().cursor(dictionary=True) 
     cursor.execute('''
         INSERT INTO Apartment (unitNumber)
         VALUES (%s)
     ''', (unit_number,))
-    db().commit()
+    get_db().commit()
     new_id = cursor.lastrowid
     return make_response(jsonify({'message': 'Apartment added', 'apartmentID': new_id}), 201)
