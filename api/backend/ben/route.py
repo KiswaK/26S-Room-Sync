@@ -5,6 +5,7 @@ from backend.db_connection import get_db
 ben = Blueprint("ben_routes", __name__)
 
 
+#GET all listings assigned to this broker
 @ben.route("/brokers/<int:broker_id>/listings", methods=["GET"])
 def get_broker_listings(broker_id):
     cursor = get_db().cursor(dictionary=True)
@@ -41,6 +42,7 @@ def get_broker_listings(broker_id):
         cursor.close()
 
 
+#GET performance across all apartments
 @ben.route("/brokers/performance", methods=["GET"])
 def get_brokers_performance():
     cursor = get_db().cursor(dictionary=True)
@@ -78,6 +80,7 @@ def get_brokers_performance():
         cursor.close()
 
 
+#GET inquiry counts per listing for this broker
 @ben.route("/brokers/<int:broker_id>/inquiries", methods=["GET"])
 def get_broker_inquiries(broker_id):
     cursor = get_db().cursor(dictionary=True)
@@ -106,6 +109,35 @@ def get_broker_inquiries(broker_id):
         cursor.close()
 
 
+#GET listings grouped by status with inquiry totals
+@ben.route("/brokers/<int:broker_id>/listings-by-status", methods=["GET"])
+def get_listings_by_status(broker_id):
+    cursor = get_db().cursor(dictionary=True)
+    try:
+        current_app.logger.info(f"GET /ben/brokers/{broker_id}/listings-by-status")
+        cursor.execute(
+            """
+            SELECT l.status,
+                   COUNT(DISTINCT l.listingID) AS totalListings,
+                   COUNT(i.inquiryID) AS totalInquiries
+            FROM Listing AS l
+            LEFT JOIN Inquiry AS i
+                ON i.listingID = l.listingID
+            WHERE l.brokerID = %s
+            GROUP BY l.status
+            ORDER BY totalListings DESC
+            """,
+            (broker_id,),
+        )
+        return jsonify(cursor.fetchall()), 200
+    except Exception as e:
+        current_app.logger.error(f"Error retrieving listings by status for broker {broker_id}: {e}")
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+
+
+#GET workload distribution across all brokers
 @ben.route("/brokers/workload", methods=["GET"])
 def get_broker_workload():
     cursor = get_db().cursor(dictionary=True)
@@ -131,6 +163,43 @@ def get_broker_workload():
         cursor.close()
 
 
+#POST Create a new performance report for an apartment
+@ben.route("/brokers/<int:broker_id>/reports", methods=["POST"])
+def create_performance_report(broker_id):
+    cursor = get_db().cursor(dictionary=True)
+    try:
+        current_app.logger.info(f"POST /ben/brokers/{broker_id}/reports")
+        data = request.get_json(silent=True) or {}
+
+        apartment_id = data.get("apartmentID")
+        view_count = data.get("viewCount", 0)
+        applications_count = data.get("applicationsCount", 0)
+        occupancy_rate = data.get("occupancyRate", 0)
+        days_on_market = data.get("daysOnMarket", 0)
+
+        if not apartment_id:
+            return jsonify({"error": "apartmentID is required"}), 400
+
+        cursor.execute(
+            """
+            INSERT INTO PerformanceReport
+                (apartmentID, brokerID, viewCount, applicationsCount, occupancyRate, daysOnMarket)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            """,
+            (apartment_id, broker_id, view_count, applications_count, occupancy_rate, days_on_market),
+        )
+        get_db().commit()
+
+        current_app.logger.info(f"Created performance report for broker {broker_id}, apartment {apartment_id}")
+        return jsonify({"message": "Performance report created", "reportID": cursor.lastrowid}), 201
+    except Exception as e:
+        current_app.logger.error(f"Error creating report for broker {broker_id}: {e}")
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+
+
+# PUT Update listing details on behalf of landlord
 @ben.route("/brokers/<int:broker_id>/listings/<int:listing_id>", methods=["PUT"])
 def update_broker_listing(broker_id, listing_id):
     cursor = get_db().cursor(dictionary=True)
@@ -172,6 +241,7 @@ def update_broker_listing(broker_id, listing_id):
         cursor.close()
 
 
+# DELETE Remove listing from broker portfolio
 @ben.route("/brokers/<int:broker_id>/listings/<int:listing_id>", methods=["DELETE"])
 def remove_broker_listing(broker_id, listing_id):
     cursor = get_db().cursor(dictionary=True)
