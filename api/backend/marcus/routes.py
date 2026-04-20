@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify, make_response
-from backend.db_connection import get_db
-import backend.db_connection as db
+from backend.db_connection import db
 
 marcus = Blueprint("marcus_routes", __name__)
 
@@ -69,7 +68,7 @@ def update_listing_status(landlord_id, listing_id):
         WHERE  listingID  = %s
         AND    landlordID = %s
     ''', (status, listing_id, landlord_id))
-    get_db().commit()
+    db().commit()
     return make_response(jsonify({'message': f'Listing {listing_id} status updated to {status}'}), 200)
 
 
@@ -83,7 +82,7 @@ def archive_listing(landlord_id, listing_id):
         WHERE  listingID  = %s
         AND    landlordID = %s
     ''', (listing_id, landlord_id))
-    get_db().commit()
+    db().commit()
     return make_response(jsonify({'message': f'Listing {listing_id} archived'}), 200)
 
 
@@ -101,7 +100,7 @@ def reopen_listing(landlord_id, listing_id):
         WHERE  listingID  = %s
         AND    landlordID = %s
     ''', (avail_date, listing_id, landlord_id))
-    get_db().commit()
+    db().commit()
     return make_response(jsonify({'message': f'Listing {listing_id} reopened'}), 200)
 
 
@@ -120,7 +119,7 @@ def get_listing_performance(landlord_id):
                COUNT(i.inquiryID) AS totalInquiries
         FROM   Listing           l
         JOIN   Apartment         a  ON l.apartmentID = a.apartmentID
-        JOIN   PerformanceReport pr ON l.listingID   = pr.listingID
+        JOIN   PerformanceReport pr ON l.apartmentID = pr.apartmentID
         LEFT   JOIN Inquiry      i  ON l.listingID   = i.listingID
         WHERE  l.landlordID = %s
         AND    l.status    != 'archived'
@@ -188,7 +187,7 @@ def mark_inquiry_read(landlord_id, inquiry_id):
         WHERE  i.inquiryID  = %s
         AND    l.landlordID = %s
     ''', (inquiry_id, landlord_id))
-    get_db().commit()
+    db().commit()
     return make_response(jsonify({'message': f'Inquiry {inquiry_id} marked as read'}), 200)
 
 
@@ -202,7 +201,7 @@ def delete_inquiry(landlord_id, inquiry_id):
         WHERE  i.inquiryID  = %s
         AND    l.landlordID = %s
     ''', (inquiry_id, landlord_id))
-    get_db().commit()
+    db().commit()
     return make_response(jsonify({'message': f'Inquiry {inquiry_id} deleted'}), 200)
 
 
@@ -234,6 +233,6 @@ def add_apartment(landlord_id):
         INSERT INTO Apartment (unitNumber)
         VALUES (%s)
     ''', (unit_number,))
-    get_db().commit()
+    db().commit()
     new_id = cursor.lastrowid
     return make_response(jsonify({'message': 'Apartment added', 'apartmentID': new_id}), 201)
