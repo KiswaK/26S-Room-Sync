@@ -109,7 +109,7 @@ def reopen_listing(landlord_id, listing_id):
 # Get views and inquiry counts for all listings
 @marcus.route('/landlord/<int:landlord_id>/listings/performance', methods=['GET'])
 def get_listing_performance(landlord_id):
-    cursor = db.get_db().cursor(dictionary=True) 
+    cursor = get_db().cursor(dictionary=True) 
     cursor.execute('''
         SELECT l.listingID,
                a.unitNumber,
