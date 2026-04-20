@@ -138,6 +138,26 @@ def update_report_status():
     finally:
         cursor.close()
 
+@sienna.route('/admin/moderation', methods = ['GET'])
+def get_moderation_actions():
+    cursor = get_db().cursor(dictionary = True)
+    try:
+        current_app.logger.info('GET /sienna/admin/moderation')
+        cursor.execute('''SELECT ma.actionID, ma.reportID, ma.actionType, ma.actionStatus,
+                                 ma.actionDate, ma.actionReason,
+                                 ma.userID, u.userName AS targetUserName,
+                                 ma.listingID
+                          FROM ModerationAction ma
+                          LEFT JOIN Users u ON ma.userID = u.userID
+                          ORDER BY ma.actionDate DESC''')
+        actions = cursor.fetchall()
+        return jsonify(actions), 200
+    except Exception as e:
+        current_app.logger.error(f'Error retrieving moderation actions: {e}')
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+
 @sienna.route('/admin/moderation', methods = ['POST'])
 def log_moderation_action():
     cursor = get_db().cursor(dictionary = True)

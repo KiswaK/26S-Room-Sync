@@ -1,11 +1,9 @@
 -- START of Problem 1 Solution --
-# create the table
 DROP DATABASE IF EXISTS `roomsync`;
 CREATE DATABASE IF NOT EXISTS `roomsync`;
 USE `roomsync`;
 
 
-# create the users table
 CREATE TABLE Users (
    userID      INT AUTO_INCREMENT NOT NULL,
    userName    VARCHAR(50)  UNIQUE NOT NULL,
@@ -25,7 +23,6 @@ CREATE TABLE Neighborhood (
 );
 
 
-# create the apartment table
 CREATE TABLE Apartment (
    apartmentID       INT AUTO_INCREMENT,
    unitNumber        VARCHAR(20) NOT NULL,
@@ -37,7 +34,6 @@ CREATE TABLE Apartment (
 );
 
 
-# create the apartment features table
 CREATE TABLE ApartmentFeatures (
    featureID   INT AUTO_INCREMENT,
    value       VARCHAR(100) NOT NULL,
