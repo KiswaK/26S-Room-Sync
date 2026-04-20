@@ -38,19 +38,18 @@ def create_listing(landlord_id):
 
     cursor = get_db().cursor(dictionary=True) 
     cursor.execute('''
-        INSERT INTO Listing (
-            title,
-            apartmentID,
-            landlordID,
-            brokerID,
-            renterID,
-            availableDate,
-            status,
-            cosignerName,
-            brokerFee
-        )
-        VALUES (%s, %s, %s, %s, NULL, %s, 'available', %s, %s)
-    ''', (title, apt_id, landlord_id, broker_id, avail_date, cosigner, broker_fee))
+    INSERT INTO Listing (
+        apartmentID,
+        landlordID,
+        brokerID,
+        renterID,
+        availableDate,
+        status,
+        cosignerName,
+        brokerFee
+    )
+    VALUES (%s, %s, %s, NULL, %s, 'available', %s, %s)
+''', (apt_id, landlord_id, broker_id, avail_date, cosigner, broker_fee))
     get_db().commit()
     return make_response(jsonify({'message': 'Listing created successfully'}), 201)
 
