@@ -136,7 +136,7 @@ CREATE TABLE Listing (
    landlordID      INT NOT NULL,
    brokerID        INT,
    renterID        INT,
-   title           VARCHAR(200) NOT NULL,
+   title           VARCHAR(200) DEFAULT NULL,
    availableDate   DATE         NOT NULL,
    status          VARCHAR(50)  NOT NULL DEFAULT 'available',
    cosignerName    VARCHAR(100),
