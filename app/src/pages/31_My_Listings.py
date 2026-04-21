@@ -45,7 +45,6 @@ st.subheader("Current Listings")
 try:
     r = requests.get(f"{API}/eliot/landlord/{landlord_id}/listings")
     listings = r.json()
-    st.write(listings)
     
     if not listings:
         st.info("No listings found.")
