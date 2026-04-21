@@ -1,12 +1,12 @@
 from flask import Blueprint, request, jsonify, make_response
 from backend.db_connection import get_db
 
-marcus = Blueprint("marcus_routes", __name__)
+eliot = Blueprint("eliot_routes", __name__)
 
 
 
 # Get all active listings for a landlord
-@marcus.route('/landlord/<int:landlord_id>/listings', methods=['GET'])
+@eliot.route('/landlord/<int:landlord_id>/listings', methods=['GET'])
 def get_landlord_listings(landlord_id):
     cursor = get_db().cursor(dictionary=True) 
     cursor.execute('''
@@ -26,7 +26,7 @@ def get_landlord_listings(landlord_id):
 
 
 # Post a new listing
-@marcus.route('/landlord/<int:landlord_id>/listings', methods=['POST'])
+@eliot.route('/landlord/<int:landlord_id>/listings', methods=['POST'])
 def create_listing(landlord_id):
     data        = request.get_json()
     unit_number = data['unitNumber']
@@ -47,7 +47,7 @@ def create_listing(landlord_id):
     return make_response(jsonify({'message': 'Listing created successfully'}), 201)
 
 # Update a listing's status (e.g. rented, available, archived)
-@marcus.route('/landlord/<int:landlord_id>/listings/<int:listing_id>/status', methods=['PUT'])
+@eliot.route('/landlord/<int:landlord_id>/listings/<int:listing_id>/status', methods=['PUT'])
 def update_listing_status(landlord_id, listing_id):
     data   = request.get_json()
     status = data['status']
@@ -64,7 +64,7 @@ def update_listing_status(landlord_id, listing_id):
 
 
 # Archive a listing
-@marcus.route('/landlord/<int:landlord_id>/listings/<int:listing_id>', methods=['DELETE'])
+@eliot.route('/landlord/<int:landlord_id>/listings/<int:listing_id>', methods=['DELETE'])
 def archive_listing(landlord_id, listing_id):
     cursor = get_db().cursor(dictionary=True) 
     cursor.execute('''
@@ -78,7 +78,7 @@ def archive_listing(landlord_id, listing_id):
 
 
 # Mark a listing as available again
-@marcus.route('/landlord/<int:landlord_id>/listings/<int:listing_id>/reopen', methods=['PUT'])
+@eliot.route('/landlord/<int:landlord_id>/listings/<int:listing_id>/reopen', methods=['PUT'])
 def reopen_listing(landlord_id, listing_id):
     data       = request.get_json()
     avail_date = data.get('availableDate')
@@ -98,7 +98,7 @@ def reopen_listing(landlord_id, listing_id):
 
 
 # Get views and inquiry counts for all listings
-@marcus.route('/landlord/<int:landlord_id>/listings/performance', methods=['GET'])
+@eliot.route('/landlord/<int:landlord_id>/listings/performance', methods=['GET'])
 def get_listing_performance(landlord_id):
     cursor = get_db().cursor(dictionary=True) 
     cursor.execute('''
@@ -126,7 +126,7 @@ def get_listing_performance(landlord_id):
 
 
 # Get performance report for a single listing
-@marcus.route('/landlord/<int:landlord_id>/listings/<int:listing_id>/performance', methods=['GET'])
+@eliot.route('/landlord/<int:landlord_id>/listings/<int:listing_id>/performance', methods=['GET'])
 def get_single_listing_performance(landlord_id, listing_id):
     cursor = get_db().cursor(dictionary=True) 
     cursor.execute('''
@@ -146,7 +146,7 @@ def get_single_listing_performance(landlord_id, listing_id):
 
 
 # Get all inquiries for a specific listing
-@marcus.route('/landlord/<int:landlord_id>/listings/<int:listing_id>/inquiries', methods=['GET'])
+@eliot.route('/landlord/<int:landlord_id>/listings/<int:listing_id>/inquiries', methods=['GET'])
 def get_listing_inquiries(landlord_id, listing_id):
     cursor = get_db().cursor(dictionary=True)
     try:
@@ -168,7 +168,7 @@ def get_listing_inquiries(landlord_id, listing_id):
     finally:
         cursor.close()
 # 
-@marcus.route('/landlord/<int:landlord_id>/inquiries/<int:inquiry_id>/read', methods=['PUT'])
+@eliot.route('/landlord/<int:landlord_id>/inquiries/<int:inquiry_id>/read', methods=['PUT'])
 def mark_inquiry_read(landlord_id, inquiry_id):
     cursor = get_db().cursor(dictionary=True) 
     cursor.execute('''
@@ -183,7 +183,7 @@ def mark_inquiry_read(landlord_id, inquiry_id):
 
 
 # Delete a specific inquiry
-@marcus.route('/landlord/<int:landlord_id>/inquiries/<int:inquiry_id>', methods=['DELETE'])
+@eliot.route('/landlord/<int:landlord_id>/inquiries/<int:inquiry_id>', methods=['DELETE'])
 def delete_inquiry(landlord_id, inquiry_id):
     cursor = get_db().cursor(dictionary=True) 
     cursor.execute('''
@@ -199,7 +199,7 @@ def delete_inquiry(landlord_id, inquiry_id):
 
 
 # Get all apartments belonging to a landlord
-@marcus.route('/landlord/<int:landlord_id>/apartments', methods=['GET'])
+@eliot.route('/landlord/<int:landlord_id>/apartments', methods=['GET'])
 def get_landlord_apartments(landlord_id):
     cursor = get_db().cursor(dictionary=True) 
     cursor.execute('''
@@ -214,7 +214,7 @@ def get_landlord_apartments(landlord_id):
 
 
 # Add a new apartment unit
-@marcus.route('/landlord/<int:landlord_id>/apartments', methods=['POST'])
+@eliot.route('/landlord/<int:landlord_id>/apartments', methods=['POST'])
 def add_apartment(landlord_id):
     data        = request.get_json()
     unit_number = data['unitNumber']

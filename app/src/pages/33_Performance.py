@@ -18,7 +18,7 @@ API = "http://web-api:4000"
 st.title("Performance Dashboard")
 
 try:
-    r = requests.get(f"{API}/marcus/landlord/{landlord_id}/listings/performance")
+    r = requests.get(f"{API}/eliot/landlord/{landlord_id}/listings/performance")
     
     if r.status_code == 200:
         data = r.json()

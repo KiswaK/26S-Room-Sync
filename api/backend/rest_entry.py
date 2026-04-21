@@ -9,7 +9,7 @@ from backend.ngos.ngo_routes import ngos
 from backend.samuel.routes import samuel
 from backend.sienna.routes import sienna
 from backend.ben.route import ben
-from backend.marcus.routes import marcus
+from backend.eliot.routes import eliot
 
 
 
@@ -45,6 +45,6 @@ def create_app():
     app.register_blueprint(samuel, url_prefix="/samuel")
     app.register_blueprint(sienna, url_prefix="/sienna")
     app.register_blueprint(ben, url_prefix="/ben")
-    app.register_blueprint (marcus, url_prefix="/marcus")
+    app.register_blueprint (eliot, url_prefix="/eliot")
 
     return app

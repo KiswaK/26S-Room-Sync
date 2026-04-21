@@ -18,7 +18,7 @@ API = "http://web-api:4000"
 st.title("Inquiries Inbox")
 
 try:
-    r = requests.get(f"{API}/marcus/landlord/{landlord_id}/listings")
+    r = requests.get(f"{API}/eliot/landlord/{landlord_id}/listings")
 
     listings = r.json()
 
@@ -29,7 +29,7 @@ try:
         selected = st.selectbox("Select a Listing", list(listing_options.keys()))
         listing_id = listing_options[selected]
 
-        r2 = requests.get(f"{API}/marcus/landlord/{landlord_id}/listings/{listing_id}/inquiries")
+        r2 = requests.get(f"{API}/eliot/landlord/{landlord_id}/listings/{listing_id}/inquiries")
         inquiries = r2.json()
 
         if not inquiries:
@@ -42,7 +42,7 @@ try:
                     if not inq['isRead']:
                         if st.button("Mark as Read", key=f"read_{inq['inquiryID']}"):
                             r3 = requests.put(
-                                f"{API}/marcus/landlord/{landlord_id}/inquiries/{inq['inquiryID']}/read"
+                                f"{API}/eliot/landlord/{landlord_id}/inquiries/{inq['inquiryID']}/read"
                             )
                             if r3.status_code == 200:
                                 st.success("Marked as read!")

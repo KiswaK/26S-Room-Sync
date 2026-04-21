@@ -25,7 +25,7 @@ with st.expander("➕ Create New Listing"):
             "availableDate": str(avail_date),
             "brokerFee":     broker_fee
         }
-        r = requests.post(f"{API}/marcus/landlord/{landlord_id}/listings", json=payload)
+        r = requests.post(f"{API}/eliot/landlord/{landlord_id}/listings", json=payload)
         if r.status_code == 201:
             st.success("Listing created!")
         else:
@@ -34,7 +34,7 @@ with st.expander("➕ Create New Listing"):
 # View existing listings
 st.subheader("Current Listings")
 try:
-    r = requests.get(f"{API}/marcus/landlord/{landlord_id}/listings")
+    r = requests.get(f"{API}/eliot/landlord/{landlord_id}/listings")
     listings = r.json()
     
     if not listings:
@@ -53,7 +53,7 @@ try:
                 )
                 if st.button("Update Status", key=f"update_{listing['listingID']}"):
                     r2 = requests.put(
-                        f"{API}/marcus/landlord/{landlord_id}/listings/{listing['listingID']}/status",
+                        f"{API}/eliot/landlord/{landlord_id}/listings/{listing['listingID']}/status",
                         json={"status": new_status}
                     )
                     if r2.status_code == 200:
@@ -64,7 +64,7 @@ try:
                 # Delete listing
                 if st.button("🗑️ Delete Listing", key=f"delete_{listing['listingID']}"):
                     r3 = requests.delete(
-                        f"{API}/marcus/landlord/{landlord_id}/listings/{listing['listingID']}"
+                        f"{API}/eliot/landlord/{landlord_id}/listings/{listing['listingID']}"
                     )
                     if r3.status_code == 200:
                         st.success("Listing deleted!")
