@@ -131,7 +131,7 @@ CREATE TABLE Dealbreakers (
 
 
 CREATE TABLE Listing (
-   listingID       INT AUTO_INCREMENT PRIMARY KEY,
+   listingID       INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
    apartmentID     INT NOT NULL,
    landlordID      INT NOT NULL,
    brokerID        INT,
@@ -235,8 +235,8 @@ CREATE TABLE ModerationAction (
    actionID      INT AUTO_INCREMENT,
    adminID       INT NOT NULL,
    userID        INT NOT NULL,
-   listingID     INT,
-   reportID      INT,
+   listingID     INT NOT NULL,
+   reportID      INT NOT NULL,
    actionType    VARCHAR(50)  NOT NULL,
    actionStatus  VARCHAR(50)  NOT NULL DEFAULT 'Pending',
    actionDate    DATE         DEFAULT (CURRENT_DATE),

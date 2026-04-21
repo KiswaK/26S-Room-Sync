@@ -11,6 +11,8 @@ SideBarLinks()
 st.title('Reported Users')
 
 REPORT_URL = "http://web-api:4000/sienna/admin/reports"
+USERS_URL = "http://web-api:4000/sienna/admin/users"
+MODERATION_URL = "http://web-api:4000/sienna/admin/moderation"
 
 # Initialize session state
 if 'processed_report_ids' not in st.session_state:
@@ -55,6 +57,54 @@ def show_action_options(report):
                     'senderID': report.get('senderID'),
                     'action': action_name
                 }
+            
+                try:
+                    user_id = report.get('reportedUserID')
+                    response = requests.put(f"{USERS_URL}/{user_id}", json={
+                        'userStatus': action_name.lower()
+                    })
+                    if response.status_code == 200:
+                        st.success(response.json().get("message", f"User status marked as {action_name}"))
+                    else:
+                        err = response.json().get('error', 'Unknown error') if response.text else 'Unknown error'
+                        st.error(f"Failed to update users status: {err}")
+                except requests.exceptions.RequestException as e:
+                    st.error(f"Error connecting to the API: {str(e)}")
+                    st.info("Please ensure the API server is running")
+                
+                try:
+                    response = requests.put(REPORT_URL, json={
+                        'reportID': report.get('reportID'),
+                        'listingID': report.get('listingID'),
+                        'userID': report.get('reportedUserID'),
+                        'adminID': report.get('adminID'),
+                        'actionType': action_name,
+                        'actionReason': None
+                    })
+                    if response.status_code == 200:
+                            st.success(response.json().get("message", "report status updated"))
+                    else:
+                        st.error(f"Failed to update listings: {response.json().get('error', 'Unknown error')}")
+                except requests.exceptions.RequestException as e:
+                    st.error(f"Error connecting to the API: {str(e)}")
+                    st.info("Please ensure the API server is running")
+                
+                try:
+                    response = requests.post(MODERATION_URL, json={
+                        'reportID': report.get('reportID'),
+                        'listingID': report.get('listingID'),
+                        'userID': report.get('reportedUserID'),
+                        'adminID': report.get('adminID'),
+                        'actionType': action_name,
+                        'actionReason': None
+                    })
+                    if response.status_code == 201:
+                        st.success(response.json().get("message", "Moderation action logged"))
+                    else:
+                        st.error(f"Failed to log moderation action: {response.json().get('error', 'Unknown error')}")
+                except requests.exceptions.RequestException as e:
+                    st.error(f"Error connecting to the API: {str(e)}")
+                    st.info("Please ensure the API server is running")
                 st.rerun()
 
 
@@ -92,3 +142,32 @@ if user_reports:
                 show_action_options(r)
 else:
     st.info("No reported users.")
+
+st.divider()
+st.subheader("Moderation History")
+try:
+    mod_response = requests.get(MODERATION_URL)
+    if mod_response.status_code == 200:
+        actions = mod_response.json()
+        if actions:
+            for a in actions:
+                with st.expander(f"Action #{a.get('actionID')} — {a.get('actionType')} on {a.get('actionDate', 'N/A')}"):
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.write(f"**Action ID:** {a.get('actionID')}")
+                        st.write(f"**Type:** {a.get('actionType')}")
+                        st.write(f"**Status:** {a.get('actionStatus', 'N/A')}")
+                        st.write(f"**Date:** {a.get('actionDate', 'N/A')}")
+                    with col2:
+                        st.write(f"**Report ID:** {a.get('reportID', 'N/A')}")
+                        st.write(f"**Listing ID:** {a.get('listingID', 'N/A')}")
+                        st.write(f"**Target User:** {a.get('targetUserName', 'N/A')} (ID: {a.get('userID', 'N/A')})")
+                    if a.get('actionReason'):
+                        st.write(f"**Reason:** {a.get('actionReason')}")
+        else:
+            st.info("No moderation actions recorded yet.")
+    else:
+        st.error(f"Failed to retrieve moderation history: {mod_response.json().get('error', 'Unknown error')}")
+except requests.exceptions.RequestException as e:
+    st.error(f"Error connecting to the API: {str(e)}")
+    st.info("Please ensure the API server is running")

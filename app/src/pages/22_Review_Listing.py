@@ -11,6 +11,9 @@ SideBarLinks()
 st.title('Review Reports')
 
 REPORT_URL = "http://web-api:4000/sienna/admin/reports"
+LISTINGS_URL = "http://web-api:4000/sienna/admin/listings"
+MODERATION_URL = "http://web-api:4000/sienna/admin/moderation"
+
 
 # Initialize session state
 if 'processed_report_ids' not in st.session_state:
@@ -34,7 +37,7 @@ def show_action_options(report):
     st.markdown("""
     <style>
     div[data-testid="stDialog"] button p {
-        font-size: 13px !important;
+        font-size: 9px !important;
         white-space: nowrap;
     }
     </style>
@@ -46,8 +49,8 @@ def show_action_options(report):
     st.divider()
     st.markdown("Choose an action:")
 
-    col1, col2, col3, col4, col5 = st.columns(5)
-    for action_name, col in [("Suspend", col1), ("Reject", col2), ("Flag", col3), ("Approve", col4), ("Archive", col5)]:
+    col1, col2, col3, col4, col5, col6 = st.columns(6)
+    for action_name, col in [("Suspend", col1), ("Reject", col2), ("Flag", col3), ("Approve", col4), ("Archive", col5), ("Inactive", col6)]:
         with col:
             if st.button(action_name, type='primary', use_container_width=True, key=f"dlg_{action_name}_{report['reportID']}"):
                 st.session_state.pending_action = {
@@ -57,6 +60,49 @@ def show_action_options(report):
                     'senderID': report.get('senderID'),
                     'action': action_name
                 }
+                try:
+                    response = requests.put(LISTINGS_URL)
+                    if response.status_code == 200:
+                        st.success(response.json().get("message", "Outdated listings marked inactive"))
+                    else:
+                        st.error(f"Failed to update listings: {response.json().get('error', response.text or 'Unknown error')}")
+                except requests.exceptions.RequestException as e:
+                    st.error(f"Error connecting to the API: {str(e)}")
+                    st.info("Please ensure the API server is running")
+                
+                try:
+                    response = requests.post(MODERATION_URL, json={
+                        'reportID': report.get('reportID'),
+                        'listingID': report.get('listingID'),
+                        'userID': report.get('reportedUserID'),
+                        'adminID': report.get('adminID'),
+                        'actionType': action_name,
+                        'actionReason': None
+                    })
+                    if response.status_code == 201:
+                        st.success(response.json().get("message", "Moderation action logged"))
+                    else:
+                        st.error(f"Failed to log moderation action: {response.json().get('error', 'Unknown error')}")
+                except requests.exceptions.RequestException as e:
+                    st.error(f"Error connecting to the API: {str(e)}")
+                    st.info("Please ensure the API server is running")
+                
+                try:
+                    response = requests.put(REPORT_URL, json={
+                        'reportID': report.get('reportID'),
+                        'listingID': report.get('listingID'),
+                        'userID': report.get('reportedUserID'),
+                        'adminID': report.get('adminID'),
+                        'actionType': action_name,
+                        'actionReason': None
+                    })
+                    if response.status_code == 200:
+                        st.success(response.json().get("message", "report status updated"))
+                    else:
+                        st.error(f"Failed to update listings: {response.json().get('error', 'Unknown error')}")
+                except requests.exceptions.RequestException as e:
+                    st.error(f"Error connecting to the API: {str(e)}")
+                    st.info("Please ensure the API server is running")
                 st.rerun()
 
 
@@ -95,7 +141,38 @@ if active_reports:
                 if st.button(f"Take action on Report #{r.get('reportID')}", type='primary',
                              use_container_width=True, key=f"btn_listing_{r.get('reportID')}"):
                     show_action_options(r)
+    
+
     else:
         st.info("No reported listings.")
 else:
     st.info("No pending reports.")
+
+st.divider()
+st.subheader("Moderation History")
+try:
+    mod_response = requests.get(MODERATION_URL)
+    if mod_response.status_code == 200:
+        actions = mod_response.json()
+        if actions:
+            for a in actions:
+                with st.expander(f"Action #{a.get('actionID')} — {a.get('actionType')} on {a.get('actionDate', 'N/A')}"):
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.write(f"**Action ID:** {a.get('actionID')}")
+                        st.write(f"**Type:** {a.get('actionType')}")
+                        st.write(f"**Status:** {a.get('actionStatus', 'N/A')}")
+                        st.write(f"**Date:** {a.get('actionDate', 'N/A')}")
+                    with col2:
+                        st.write(f"**Report ID:** {a.get('reportID', 'N/A')}")
+                        st.write(f"**Listing ID:** {a.get('listingID', 'N/A')}")
+                        st.write(f"**Target User:** {a.get('targetUserName', 'N/A')} (ID: {a.get('userID', 'N/A')})")
+                    if a.get('actionReason'):
+                        st.write(f"**Reason:** {a.get('actionReason')}")
+        else:
+            st.info("No moderation actions recorded yet.")
+    else:
+        st.error(f"Failed to retrieve moderation history: {mod_response.json().get('error', 'Unknown error')}")
+except requests.exceptions.RequestException as e:
+    st.error(f"Error connecting to the API: {str(e)}")
+    st.info("Please ensure the API server is running")
