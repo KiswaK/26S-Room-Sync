@@ -49,7 +49,7 @@ if not listings:
 st.dataframe(listings, use_container_width=True, hide_index=True)
 
 #select listing for edit
-listing_options = {f"{item['listingID']} - {item['title']}": item for item in listings}
+listing_options = {f"{item['title']}": item for item in listings}
 selected_key = st.selectbox("Choose listing", list(listing_options.keys()))
 selected_listing = listing_options[selected_key]
 

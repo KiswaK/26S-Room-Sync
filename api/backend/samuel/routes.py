@@ -124,26 +124,6 @@ def update_renter_dealbreakers(renter_id):
         return jsonify({"error": str(e)}), 500
     finally:
         cursor.close()
-
-@samuel.route('/neighborhoods/<neighborhood_id>', methods=['GET'])
-def get_neighborhood_info(neighborhood_id):
-    cursor = get_db().cursor(dictionary=True)
-    try:
-        current_app.logger.info(f'GET /samuel/neighborhoods/{neighborhood_id}')
-
-        cursor.execute('SELECT neighborhoodName, neighborhoodInsights FROM Neighborhood WHERE neighborhoodID = %s', (neighborhood_id,))
-        info = cursor.fetchone()
-
-        if not info:
-            return jsonify({"error": "Neighborhood not found"}), 404
-
-        current_app.logger.info(f'Retrieved insights for neighborhood {neighborhood_id}')
-        return jsonify(info), 200
-    except Exception as e:
-        current_app.logger.error(f'Error retrieving insights for neighborhood {neighborhood_id}: {e}')
-        return jsonify({"error": str(e)}), 500
-    finally:
-        cursor.close()
         
 @samuel.route('/renters/<renter_id>/inquiries', methods=['GET'])
 def get_renter_inquiries(renter_id):
@@ -188,23 +168,6 @@ def create_renter_inquiry(renter_id):
         return jsonify({"message": "Inquiry created successfully"}), 201
     except Exception as e:
         current_app.logger.error(f'Error creating inquiry for renter {renter_id}: {e}')
-        return jsonify({"error": str(e)}), 500
-    finally:
-        cursor.close()
-        
-@samuel.route('/listings/<listing_id>/images', methods=['GET'])
-def get_listing_images(listing_id):
-    cursor = get_db().cursor(dictionary=True)
-    try:
-        current_app.logger.info(f'GET /samuel/listings/{listing_id}/images')
-
-        cursor.execute('SELECT imageURL FROM ListingImage WHERE listingID = %s', (listing_id,))
-        images = cursor.fetchall()
-
-        current_app.logger.info(f'Retrieved image URLs for listing {listing_id}')
-        return jsonify(images), 200
-    except Exception as e:
-        current_app.logger.error(f'Error retrieving images for listing {listing_id}: {e}')
         return jsonify({"error": str(e)}), 500
     finally:
         cursor.close()

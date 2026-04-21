@@ -56,17 +56,17 @@ def add_ngo_nav():
 
 def prediction_nav():
     st.sidebar.page_link(
-        "pages/11_Assigned_Listings.py", label="Assigned Listing", icon="📈"
+        "pages/11_Assigned_Listings.py", label="Assigned Listing", icon="🏢"
     )
 
 
 def api_test_nav():
-    st.sidebar.page_link("pages/12_Market_Performance.py", label="Market Performance", icon="🛜")
+    st.sidebar.page_link("pages/12_Market_Performance.py", label="Market Performance", icon="📈")
 
 
 def classification_nav():
     st.sidebar.page_link(
-        "pages/13_Inquiries_Workload.py", label="Inquiries Workload", icon="🌺"
+        "pages/13_Inquiries_Workload.py", label="Inquiries Workload", icon="📩"
     )
 
 
@@ -135,10 +135,8 @@ def SideBarLinks(show_home=False):
             world_bank_viz_nav()
             map_demo_nav()
 
-        if st.session_state["role"] == "usaid_worker":
+        if st.session_state["role"] == "broker":
             usaid_worker_home_nav()
-            ngo_directory_nav()
-            add_ngo_nav()
             prediction_nav()
             api_test_nav()
             classification_nav()
