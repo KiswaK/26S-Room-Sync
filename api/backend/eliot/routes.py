@@ -77,26 +77,6 @@ def archive_listing(landlord_id, listing_id):
     return make_response(jsonify({'message': f'Listing {listing_id} archived'}), 200)
 
 
-# Mark a listing as available again
-@eliot.route('/landlord/<int:landlord_id>/listings/<int:listing_id>/reopen', methods=['PUT'])
-def reopen_listing(landlord_id, listing_id):
-    data       = request.get_json()
-    avail_date = data.get('availableDate')
-
-    cursor = get_db().cursor(dictionary=True) 
-    cursor.execute('''
-        UPDATE Listing
-        SET    status        = 'available',
-               availableDate = %s
-        WHERE  listingID  = %s
-        AND    landlordID = %s
-    ''', (avail_date, listing_id, landlord_id))
-    get_db().commit()
-    return make_response(jsonify({'message': f'Listing {listing_id} reopened'}), 200)
-
-
-
-
 # Get views and inquiry counts for all listings
 @eliot.route('/landlord/<int:landlord_id>/listings/performance', methods=['GET'])
 def get_listing_performance(landlord_id):
@@ -123,26 +103,6 @@ def get_listing_performance(landlord_id):
     ''', (landlord_id,))
     rows = cursor.fetchall()
     return make_response(jsonify(rows), 200)
-
-
-# Get performance report for a single listing
-@eliot.route('/landlord/<int:landlord_id>/listings/<int:listing_id>/performance', methods=['GET'])
-def get_single_listing_performance(landlord_id, listing_id):
-    cursor = get_db().cursor(dictionary=True) 
-    cursor.execute('''
-        SELECT pr.reportID,
-               pr.viewCount,
-               pr.applicationsCount,
-               pr.occupancyRate,
-               pr.daysOnMarket
-        FROM   PerformanceReport pr
-        JOIN   Listing           l ON pr.listingID = l.listingID
-        WHERE  pr.listingID = %s
-        AND    l.landlordID = %s
-    ''', (listing_id, landlord_id))
-    row = cursor.fetchone()
-    return make_response(jsonify(row), 200)
-
 
 
 # Get all inquiries for a specific listing
@@ -194,47 +154,3 @@ def respond_to_inquiry(landlord_id, inquiry_id):
         return make_response(jsonify({'error': str(e)}), 500)
     finally:
         cursor.close()
-
-
-# Delete a specific inquiry
-@eliot.route('/landlord/<int:landlord_id>/inquiries/<int:inquiry_id>', methods=['DELETE'])
-def delete_inquiry(landlord_id, inquiry_id):
-    cursor = get_db().cursor(dictionary=True) 
-    cursor.execute('''
-        DELETE i FROM Inquiry i
-        JOIN   Listing l ON i.listingID = l.listingID
-        WHERE  i.inquiryID  = %s
-        AND    l.landlordID = %s
-    ''', (inquiry_id, landlord_id))
-    get_db().commit()
-    return make_response(jsonify({'message': f'Inquiry {inquiry_id} deleted'}), 200)
-
-
-
-
-# Get all apartments belonging to a landlord
-@eliot.route('/landlord/<int:landlord_id>/apartments', methods=['GET'])
-def get_landlord_apartments(landlord_id):
-    cursor = get_db().cursor(dictionary=True) 
-    cursor.execute('''
-        SELECT DISTINCT a.apartmentID,
-                        a.unitNumber
-        FROM   Apartment a
-        JOIN   Listing   l ON a.apartmentID = l.apartmentID
-        WHERE  l.landlordID = %s
-    ''', (landlord_id,))
-    rows = cursor.fetchall()
-    return make_response(jsonify(rows), 200)
-
-
-# Add a new apartment unit
-@eliot.route('/landlord/<int:landlord_id>/apartments', methods=['POST'])
-def add_apartment(landlord_id):
-    data        = request.get_json()
-    unit_number = data['unitNumber']
-
-    cursor = get_db().cursor(dictionary=True) 
-    cursor.execute('INSERT INTO Apartment (unitNumber, neighborhoodID) VALUES (%s, %s)', (unit_number, 1))
-    get_db().commit()
-    new_id = cursor.lastrowid
-    return make_response(jsonify({'message': 'Apartment added', 'apartmentID': new_id}), 201)
