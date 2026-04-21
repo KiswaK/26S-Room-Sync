@@ -135,10 +135,8 @@ def SideBarLinks(show_home=False):
             world_bank_viz_nav()
             map_demo_nav()
 
-        if st.session_state["role"] == "usaid_worker":
+        if st.session_state["role"] == "broker":
             usaid_worker_home_nav()
-            ngo_directory_nav()
-            add_ngo_nav()
             prediction_nav()
             api_test_nav()
             classification_nav()
