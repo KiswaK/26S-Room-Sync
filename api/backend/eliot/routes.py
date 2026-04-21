@@ -105,12 +105,12 @@ def get_listing_performance(landlord_id):
         SELECT l.listingID,
                a.unitNumber,
                l.status,
-               pr.viewCount,
-               pr.applicationsCount,
+               COALESCE(pr.viewCount, 0)          AS viewCount,
+               COALESCE(pr.applicationsCount, 0)   AS applicationsCount,
                COUNT(i.inquiryID) AS totalInquiries
         FROM   Listing           l
         JOIN   Apartment         a  ON l.apartmentID = a.apartmentID
-        JOIN   PerformanceReport pr ON l.apartmentID = pr.apartmentID
+        LEFT   JOIN PerformanceReport pr ON l.apartmentID = pr.apartmentID
         LEFT   JOIN Inquiry      i  ON l.listingID   = i.listingID
         WHERE  l.landlordID = %s
         AND    l.status    != 'archived'
@@ -153,6 +153,7 @@ def get_listing_inquiries(landlord_id, listing_id):
         cursor.execute('''
             SELECT i.inquiryID,
                    i.message,
+                   i.response,
                    i.sentAt,
                    i.isRead
             FROM   Inquiry i
@@ -167,19 +168,32 @@ def get_listing_inquiries(landlord_id, listing_id):
         return make_response(jsonify({'error': str(e)}), 500)
     finally:
         cursor.close()
-# 
-@eliot.route('/landlord/<int:landlord_id>/inquiries/<int:inquiry_id>/read', methods=['PUT'])
-def mark_inquiry_read(landlord_id, inquiry_id):
-    cursor = get_db().cursor(dictionary=True) 
-    cursor.execute('''
-        UPDATE Inquiry i
-        JOIN   Listing l ON i.listingID = l.listingID
-        SET    i.isRead = 1
-        WHERE  i.inquiryID  = %s
-        AND    l.landlordID = %s
-    ''', (inquiry_id, landlord_id))
-    get_db().commit()
-    return make_response(jsonify({'message': f'Inquiry {inquiry_id} marked as read'}), 200)
+# Respond to an inquiry (also marks it as read)
+@eliot.route('/landlord/<int:landlord_id>/inquiries/<int:inquiry_id>/respond', methods=['PUT'])
+def respond_to_inquiry(landlord_id, inquiry_id):
+    data = request.get_json()
+    response_text = data.get('response')
+    if not response_text:
+        return make_response(jsonify({'error': 'Response text is required'}), 400)
+
+    cursor = get_db().cursor(dictionary=True)
+    try:
+        cursor.execute('''
+            UPDATE Inquiry i
+            JOIN   Listing l ON i.listingID = l.listingID
+            SET    i.response = %s,
+                   i.isRead   = 1
+            WHERE  i.inquiryID  = %s
+            AND    l.landlordID = %s
+        ''', (response_text, inquiry_id, landlord_id))
+        if cursor.rowcount == 0:
+            return make_response(jsonify({'error': 'Inquiry not found or access denied'}), 404)
+        get_db().commit()
+        return make_response(jsonify({'message': f'Response saved for inquiry {inquiry_id}'}), 200)
+    except Exception as e:
+        return make_response(jsonify({'error': str(e)}), 500)
+    finally:
+        cursor.close()
 
 
 # Delete a specific inquiry

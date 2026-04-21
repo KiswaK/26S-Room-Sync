@@ -22,6 +22,7 @@ try:
     
     if r.status_code == 200:
         data = r.json()
+        st.write(data)
         
         if not data:
             st.info("No performance data found.")

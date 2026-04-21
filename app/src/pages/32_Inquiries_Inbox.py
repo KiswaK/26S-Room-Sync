@@ -36,18 +36,31 @@ try:
             st.info("No inquiries for this listing.")
         else:
             for inq in inquiries:
-                with st.expander(f"{'✅' if inq['isRead'] else '🔵'} {inq['sentAt']}"):
+                status_icon = '✅' if inq['isRead'] else '🔵'
+                with st.expander(f"{status_icon} {inq['sentAt']}"):
                     st.write(f"**Message:** {inq['message']}")
-                    
-                    if not inq['isRead']:
-                        if st.button("Mark as Read", key=f"read_{inq['inquiryID']}"):
-                            r3 = requests.put(
-                                f"{API}/eliot/landlord/{landlord_id}/inquiries/{inq['inquiryID']}/read"
-                            )
-                            if r3.status_code == 200:
-                                st.success("Marked as read!")
+
+                    if inq.get('response'):
+                        st.write(f"**Your Response:** {inq['response']}")
+                    else:
+                        response_text = st.text_area(
+                            "Write your response",
+                            key=f"resp_{inq['inquiryID']}",
+                            placeholder="Type your reply here..."
+                        )
+                        if st.button("Send Response", key=f"send_{inq['inquiryID']}"):
+                            if response_text.strip():
+                                r3 = requests.put(
+                                    f"{API}/eliot/landlord/{landlord_id}/inquiries/{inq['inquiryID']}/respond",
+                                    json={"response": response_text.strip()}
+                                )
+                                if r3.status_code == 200:
+                                    st.success("Response sent!")
+                                    st.rerun()
+                                else:
+                                    st.error(f"Error: {r3.text}")
                             else:
-                                st.error(f"Error: {r3.text}")
+                                st.warning("Please enter a response before sending.")
 
 except Exception as e:
     st.error(f"Error connecting to API: {e}")

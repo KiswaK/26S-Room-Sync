@@ -11,6 +11,9 @@ API = "http://web-api:4000"
 
 st.title("My Listings")
 
+if "show_success_modal" not in st.session_state:
+    st.session_state.show_success_modal = False
+
 # Create new listing
 with st.expander("➕ Create New Listing"):
     unit_number = st.text_input("Unit Number")
@@ -27,15 +30,22 @@ with st.expander("➕ Create New Listing"):
         }
         r = requests.post(f"{API}/eliot/landlord/{landlord_id}/listings", json=payload)
         if r.status_code == 201:
-            st.success("Listing created!")
+            st.success('Listing created!')
         else:
             st.error(f"Error: {r.text}")
+
+@st.dialog('Status updated!')
+def show_success_dialog():
+    if st.button('Back to list'):
+        st.session_state['show_success_modal'] = False
+        st.rerun()
 
 # View existing listings
 st.subheader("Current Listings")
 try:
     r = requests.get(f"{API}/eliot/landlord/{landlord_id}/listings")
     listings = r.json()
+    st.write(listings)
     
     if not listings:
         st.info("No listings found.")
@@ -57,7 +67,7 @@ try:
                         json={"status": new_status}
                     )
                     if r2.status_code == 200:
-                        st.success("Status updated!")
+                        st.session_state.show_success_modal = True
                     else:
                         st.error(f"Error: {r2.text}")
                 
@@ -70,6 +80,8 @@ try:
                         st.success("Listing deleted!")
                     else:
                         st.error(f"Error: {r3.text}")
+    if st.session_state['show_success_modal']:
+        show_success_dialog()
 
 except Exception as e:
     st.error(f"Error connecting to API: {e}")
