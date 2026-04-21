@@ -40,7 +40,6 @@ def create_app():
     # and give a url prefix to each.
     app.logger.info("create_app(): registering blueprints")
     app.register_blueprint(simple_routes)
-    app.register_blueprint(ngos, url_prefix="/ngo")
     app.register_blueprint(samuel, url_prefix="/samuel")
     app.register_blueprint(sienna, url_prefix="/sienna")
     app.register_blueprint(ben, url_prefix="/ben")
