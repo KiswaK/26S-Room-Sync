@@ -170,20 +170,16 @@ CREATE TABLE ListingImage (
 CREATE TABLE Inquiry (
    inquiryID   INT AUTO_INCREMENT,
    listingID   INT NOT NULL,
-   renterID    INT NOT NULL,
+   senderName  VARCHAR(100),
+   senderEmail VARCHAR(100),
    message     TEXT         NOT NULL,
-   response    TEXT,
    sentAt      DATE         NOT NULL DEFAULT (CURRENT_DATE),
    isRead      BOOLEAN      NOT NULL DEFAULT FALSE,
    PRIMARY KEY(inquiryID),
    FOREIGN KEY (listingID) REFERENCES Listing(listingID)
        ON UPDATE CASCADE
-       ON DELETE RESTRICT,
-   FOREIGN KEY (renterID) REFERENCES Renter(renterID)
-       ON UPDATE CASCADE
        ON DELETE RESTRICT
 );
-
 
 CREATE TABLE PerformanceReport (
    reportID            INT AUTO_INCREMENT,
