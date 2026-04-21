@@ -56,17 +56,17 @@ def add_ngo_nav():
 
 def prediction_nav():
     st.sidebar.page_link(
-        "pages/11_Assigned_Listings.py", label="Assigned Listing", icon="📈"
+        "pages/11_Assigned_Listings.py", label="Assigned Listing", icon="🏢"
     )
 
 
 def api_test_nav():
-    st.sidebar.page_link("pages/12_Market_Performance.py", label="Market Performance", icon="🛜")
+    st.sidebar.page_link("pages/12_Market_Performance.py", label="Market Performance", icon="📈")
 
 
 def classification_nav():
     st.sidebar.page_link(
-        "pages/13_Inquiries_Workload.py", label="Inquiries Workload", icon="🌺"
+        "pages/13_Inquiries_Workload.py", label="Inquiries Workload", icon="📩"
     )
 
 
