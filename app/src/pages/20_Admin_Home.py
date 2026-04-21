@@ -22,6 +22,6 @@ if st.button('Review users',
     st.switch_page('pages/23_Review_Users.py')
 
 if st.button('View processed users/listings',
-             type='secondary',
+             type='primary',
              use_container_width=True):
     st.switch_page('pages/24_View_processed_userList.py')
