@@ -5,7 +5,6 @@ import logging
 
 from backend.db_connection import init_app as init_db
 from backend.simple.simple_routes import simple_routes
-from backend.ngos.ngo_routes import ngos
 from backend.samuel.routes import samuel
 from backend.sienna.routes import sienna
 from backend.ben.route import ben
