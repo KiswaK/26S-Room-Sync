@@ -21,6 +21,8 @@ if 'processed_items' not in st.session_state:
     st.session_state.processed_items = []
 if 'pending_action' not in st.session_state:
     st.session_state.pending_action = None
+if 'nav_popup' not in st.session_state:
+    st.session_state.nav_popup = None
 
 # Process any action chosen in the dialog (runs after rerun)
 if st.session_state.pending_action:
@@ -28,6 +30,26 @@ if st.session_state.pending_action:
     st.session_state.processed_report_ids.add(pa['reportID'])
     st.session_state.processed_items.append(pa)
     st.session_state.pending_action = None
+
+# Show post-action navigation popup if an action was just completed
+if st.session_state.nav_popup:
+    nav = st.session_state.nav_popup
+
+    @st.dialog("Action Complete")
+    def show_nav_popup():
+        st.success(f"Action **{nav['action']}** applied to User #{nav.get('reportedUserID')}.")
+        st.write("What would you like to do next?")
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("Go to Processed User List", use_container_width=True, type="primary"):
+                st.session_state.nav_popup = None
+                st.switch_page("pages/24_View_processed_userList.py")
+        with col2:
+            if st.button("Stay in Review Users", use_container_width=True):
+                st.session_state.nav_popup = None
+                st.rerun()
+
+    show_nav_popup()
 
 
 @st.dialog("Take Action")
@@ -105,6 +127,10 @@ def show_action_options(report):
                 except requests.exceptions.RequestException as e:
                     st.error(f"Error connecting to the API: {str(e)}")
                     st.info("Please ensure the API server is running")
+                st.session_state.nav_popup = {
+                    'action': action_name,
+                    'reportedUserID': report.get('reportedUserID'),
+                }
                 st.rerun()
 
 
