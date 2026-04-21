@@ -236,7 +236,7 @@ CREATE TABLE ModerationAction (
    adminID       INT NOT NULL,
    userID        INT NOT NULL,
    listingID     INT NOT NULL,
-   reportID      INT NOT NULL,
+   reportID      INT,
    actionType    VARCHAR(50)  NOT NULL,
    actionStatus  VARCHAR(50)  NOT NULL DEFAULT 'Pending',
    actionDate    DATE         DEFAULT (CURRENT_DATE),
