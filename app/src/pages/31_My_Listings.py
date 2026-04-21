@@ -13,14 +13,14 @@ st.title("My Listings")
 
 # Create new listing
 with st.expander("➕ Create New Listing"):
-    title = st.text_input("Listing Title")
+    unit_number = st.text_input("Unit Number")
     apt_id     = st.number_input("Apartment ID", min_value=1, step=1)
     avail_date = st.date_input("Available Date")
     broker_fee = st.number_input("Broker Fee ($)", min_value=0.0, step=50.0)
     
     if st.button("Create Listing"):
         payload = {
-            "title":         title,
+            "unitNumber":         unit_number,
             "apartmentID":   apt_id,
             "availableDate": str(avail_date),
             "brokerFee":     broker_fee

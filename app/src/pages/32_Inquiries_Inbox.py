@@ -20,9 +20,6 @@ st.title("Inquiries Inbox")
 try:
     r = requests.get(f"{API}/marcus/landlord/{landlord_id}/listings")
 
-    st.write(f"Status code: {r.status_code}")
-    st.write(f"Response: {r.text}")
-
     listings = r.json()
 
     if not listings:

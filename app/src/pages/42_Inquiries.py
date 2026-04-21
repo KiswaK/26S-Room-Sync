@@ -77,7 +77,7 @@ standardized_inquires = []
 for inquiry in inquiries:
     standardized_inquires.append({
         "Listing Title": inquiry["listingTitle"],
-        "Sent At": parsedate_to_datetime(inquiry["sentAt"]).strftime("%Y-%m-%d %H:%M:%S"),
+        "Sent At": parsedate_to_datetime(inquiry["sentAt"]).strftime("%Y-%m-%d"),
         "Message": inquiry["message"],
         "Read?": "Yes" if inquiry["isRead"] else "No",
         "Response": inquiry["response"] if inquiry["response"] else "[None]"
@@ -86,7 +86,7 @@ for inquiry in inquiries:
 ## send inquiry
 st.header("Send an Inquiry")
 with st.form(key=f"inquiry_form_{st.session_state.form_key_counter}"):
-    listing_chosen = st.selectbox("Select Listing", options=listings, format_func=lambda x: x['title'])
+    listing_chosen = st.selectbox("Select Listing", options=listings, format_func=lambda x: x['title'] or f"Listing {x['listingID']}")
     message = st.text_area("Your Message")
     submitted = st.form_submit_button(label="Send Inquiry")
 

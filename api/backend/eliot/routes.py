@@ -28,31 +28,23 @@ def get_landlord_listings(landlord_id):
 # Post a new listing
 @marcus.route('/landlord/<int:landlord_id>/listings', methods=['POST'])
 def create_listing(landlord_id):
-    data       = request.get_json()
-    title      = data['title'] 
-    apt_id     = data['apartmentID']
-    broker_id  = data.get('brokerID', None)
-    avail_date = data['availableDate']
-    broker_fee = data.get('brokerFee', 0.00)
-    cosigner   = data.get('cosignerName', None)
+    data        = request.get_json()
+    unit_number = data['unitNumber']
+    broker_id   = data.get('brokerID', None)
+    avail_date  = data['availableDate']
+    broker_fee  = data.get('brokerFee', 0.00)
+    cosigner    = data.get('cosignerName', None)
 
-    cursor = get_db().cursor(dictionary=True) 
+    cursor = get_db().cursor(dictionary=True)
+    cursor.execute('INSERT INTO Apartment (unitNumber, neighborhoodID) VALUES (%s, %s)', (unit_number, 1))
+    new_apt_id = cursor.lastrowid
+
     cursor.execute('''
-    INSERT INTO Listing (
-        apartmentID,
-        landlordID,
-        brokerID,
-        renterID,
-        availableDate,
-        status,
-        cosignerName,
-        brokerFee
-    )
-    VALUES (%s, %s, %s, NULL, %s, 'available', %s, %s)
-''', (apt_id, landlord_id, broker_id, avail_date, cosigner, broker_fee))
+        INSERT INTO Listing (apartmentID, landlordID, brokerID, renterID, availableDate, status, cosignerName, brokerFee)
+        VALUES (%s, %s, %s, NULL, %s, 'available', %s, %s)
+    ''', (new_apt_id, landlord_id, broker_id, avail_date, cosigner, broker_fee))
     get_db().commit()
     return make_response(jsonify({'message': 'Listing created successfully'}), 201)
-
 
 # Update a listing's status (e.g. rented, available, archived)
 @marcus.route('/landlord/<int:landlord_id>/listings/<int:listing_id>/status', methods=['PUT'])
@@ -228,10 +220,7 @@ def add_apartment(landlord_id):
     unit_number = data['unitNumber']
 
     cursor = get_db().cursor(dictionary=True) 
-    cursor.execute('''
-        INSERT INTO Apartment (unitNumber)
-        VALUES (%s)
-    ''', (unit_number,))
+    cursor.execute('INSERT INTO Apartment (unitNumber, neighborhoodID) VALUES (%s, %s)', (unit_number, 1))
     get_db().commit()
     new_id = cursor.lastrowid
     return make_response(jsonify({'message': 'Apartment added', 'apartmentID': new_id}), 201)
